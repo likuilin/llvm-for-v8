@@ -147,7 +147,10 @@ namespace CallingConv {
 
     /// \brief MSVC calling convention that passes vectors and vector aggregates
     /// in SSE registers.
-    X86_VectorCall = 80
+    X86_VectorCall = 80,
+
+    // Calling convention the V8 JavaScript JIT engine uses internally.
+    X86_64_V8 = 81,
   };
 } // End CallingConv namespace
 

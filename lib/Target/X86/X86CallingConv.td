@@ -191,6 +191,17 @@ def RetCC_X86_64_WebKit_JS : CallingConv<[
   CCIfType<[i64], CCAssignToReg<[RAX]>>
 ]>;
 
+// X86-64 V8 return-value convention.
+// It looks like WebKit but it feels right to duplicate
+// in case the WebKit convention potentially changes
+def RetCC_X86_64_V8 : CallingConv<[
+  // Promote all types to i64
+  CCIfType<[i8, i16, i32], CCPromoteToType<i64>>,
+
+  // Return: RAX
+  CCIfType<[i64], CCAssignToReg<[RAX]>>
+]>;
+
 // X86-64 AnyReg return-value convention. No explicit register is specified for
 // the return-value. The register allocator is allowed and expected to choose
 // any free register.
@@ -200,6 +211,20 @@ def RetCC_X86_64_WebKit_JS : CallingConv<[
 // builds. On Release builds we fallback to the X86 C calling convention.
 def RetCC_X86_64_AnyReg : CallingConv<[
   CCCustom<"CC_X86_AnyReg_Error">
+]>;
+
+def CC_X86_64_V8 : CallingConv<[
+  // Promote i8/i16/i32 arguments to i64.
+  // Do we have such arguments? IDK
+  CCIfType<[i8, i16, i32], CCPromoteToType<i64>>,
+
+  // First two arguments are context and callee's JSFunction object
+  CCIfType<[i64], CCAssignToReg<[RSI, RDI]>>,
+
+  // The remaining integer arguments are passed on the stack.
+  // 64bit integer and floating-point arguments are aligned to 8 byte and stored
+  // in 8 byte stack slots.
+  CCIfType<[i64, f64], CCAssignToStack<8, 8>>
 ]>;
 
 // This is the root return-value convention for the X86-32 backend.
@@ -218,6 +243,9 @@ def RetCC_X86_32 : CallingConv<[
 def RetCC_X86_64 : CallingConv<[
   // HiPE uses RetCC_X86_64_HiPE
   CCIfCC<"CallingConv::HiPE", CCDelegateTo<RetCC_X86_64_HiPE>>,
+
+  // V8 return
+  CCIfCC<"CallingConv::X86_64_V8", CCDelegateTo<RetCC_X86_64_V8>>,
 
   // Handle JavaScript calls.
   CCIfCC<"CallingConv::WebKit_JS", CCDelegateTo<RetCC_X86_64_WebKit_JS>>,
@@ -727,6 +755,7 @@ def CC_X86_32 : CallingConv<[
 
 // This is the root argument convention for the X86-64 backend.
 def CC_X86_64 : CallingConv<[
+  CCIfCC<"CallingConv::X86_64_V8", CCDelegateTo<CC_X86_64_V8>>,
   CCIfCC<"CallingConv::GHC", CCDelegateTo<CC_X86_64_GHC>>,
   CCIfCC<"CallingConv::HiPE", CCDelegateTo<CC_X86_64_HiPE>>,
   CCIfCC<"CallingConv::WebKit_JS", CCDelegateTo<CC_X86_64_WebKit_JS>>,
