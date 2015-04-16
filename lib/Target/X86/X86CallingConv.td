@@ -222,9 +222,9 @@ def CC_X86_64_V8 : CallingConv<[
   CCIfType<[i64], CCAssignToReg<[RSI, RDI]>>,
 
   // The remaining integer arguments are passed on the stack.
-  // 64bit integer and floating-point arguments are aligned to 8 byte and stored
+  // 64bit integer and floating-point arguments are default-aligned and stored
   // in 8 byte stack slots.
-  CCIfType<[i64, f64], CCAssignToStack<8, 8>>
+  CCIfType<[i64, f64], CCAssignToStack<8, 0>>
 ]>;
 
 // This is the root return-value convention for the X86-32 backend.
