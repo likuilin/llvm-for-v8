@@ -326,7 +326,7 @@ def BND3 : X86Reg<"bnd3",   3>;
 // require a REX prefix. For example, "addb %ah, %dil" and "movzbl %ah, %r8d"
 // cannot be encoded.
 def GR8 : RegisterClass<"X86", [i8],  8,
-                        (add AL, CL, DL, AH, CH, DH, BL, BH, SIL, DIL, BPL, SPL,
+                        (add AL, CL, DL, BL, AH, CH, DH, BH, DIL, SIL, BPL, SPL,
                              R8B, R9B, R10B, R11B, R14B, R15B, R12B)> {
   let AltOrders = [(sub GR8, AH, BH, CH, DH)];
   let AltOrderSelect = [{
@@ -335,19 +335,19 @@ def GR8 : RegisterClass<"X86", [i8],  8,
 }
 
 def GR16 : RegisterClass<"X86", [i16], 16,
-                         (add AX, CX, DX, SI, DI, BX, BP, SP,
+                         (add AX, CX, DX, BX, DI, SI, BP, SP,
                               R8W, R9W, R10W, R11W, R14W, R15W, R12W)>;
 
 def GR32 : RegisterClass<"X86", [i32], 32,
-                         (add EAX, ECX, EDX, ESI, EDI, EBX, EBP, ESP,
+                         (add EAX, ECX, EDX, EBX, EDI, ESI, EBP, ESP,
                               R8D, R9D, R10D, R11D, R14D, R15D, R12D)>;
 
 // GR64 - 64-bit GPRs. This oddly includes RIP, which isn't accurate, since
 // RIP isn't really a register and it can't be used anywhere except in an
 // address, but it doesn't cause trouble.
 def GR64 : RegisterClass<"X86", [i64], 64,
-                         (add RAX, RCX, RDX, RSI, RDI, R8, R9, R10, R11,
-                              RBX, R14, R15, R12, RBP, RSP, RIP)>;
+                         (add RAX, RCX, RDX, RBX, RDI, RSI,
+                              R8, R9, R10, R11, R14, R15, R12, RBP, RSP, RIP)>;
 
 // Segment registers for use by MOV instructions (and others) that have a
 //   segment register as one operand.  Always contain a 16-bit segment
