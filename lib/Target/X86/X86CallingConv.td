@@ -793,8 +793,9 @@ def CSR_64EHRet : CalleeSavedRegs<(add RAX, RDX, CSR_64)>;
 def CSR_Win64 : CalleeSavedRegs<(add RBX, RBP, RDI, RSI, R12, R13, R14, R15,
                                      (sequence "XMM%u", 6, 15))>;
 
-// RAX, RBX, RCX, RDX, RDI, RSI(?) are caller-saved
-def CSR_X86_64_V8 : CalleeSavedRegs<(add RBP)>;
+// RAX, RBX, RCX, RDX are caller-saved
+// RSI, RDI, should always pe pushed onto the stack
+def CSR_X86_64_V8 : CalleeSavedRegs<(add RDI, RSI)>;
 
 // All GPRs - except r11
 def CSR_64_RT_MostRegs : CalleeSavedRegs<(add CSR_64, RAX, RCX, RDX, RSI, RDI,
