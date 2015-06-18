@@ -202,6 +202,11 @@ def RetCC_X86_64_V8 : CallingConv<[
   CCIfType<[i64], CCAssignToReg<[RAX]>>
 ]>;
 
+def RetCC_X86_64_V8_CES : CallingConv<[
+  // Return: RAX // TODO: sometimes it's 2 values
+  CCIfType<[i64], CCAssignToReg<[RAX]>>
+]>;
+
 // X86-64 AnyReg return-value convention. No explicit register is specified for
 // the return-value. The register allocator is allowed and expected to choose
 // any free register.
@@ -227,6 +232,12 @@ def CC_X86_64_V8 : CallingConv<[
   CCIfType<[i64, f64], CCAssignToStack<8, 0>>
 ]>;
 
+def CC_X86_64_V8_CES : CallingConv<[
+  // The first (and only) 3 args are: nargs for the runtime function,
+  // address of the runtime funciton and the current JS context
+  CCIfType<[i64], CCAssignToReg<[RAX, RBX, RSI]>>
+]>;
+
 // This is the root return-value convention for the X86-32 backend.
 def RetCC_X86_32 : CallingConv<[
   // If FastCC, use RetCC_X86_32_Fast.
@@ -246,6 +257,7 @@ def RetCC_X86_64 : CallingConv<[
 
   // V8 return
   CCIfCC<"CallingConv::X86_64_V8", CCDelegateTo<RetCC_X86_64_V8>>,
+  CCIfCC<"CallingConv::X86_64_V8_CES", CCDelegateTo<RetCC_X86_64_V8_CES>>,
 
   // Handle JavaScript calls.
   CCIfCC<"CallingConv::WebKit_JS", CCDelegateTo<RetCC_X86_64_WebKit_JS>>,
@@ -755,6 +767,7 @@ def CC_X86_32 : CallingConv<[
 
 // This is the root argument convention for the X86-64 backend.
 def CC_X86_64 : CallingConv<[
+  CCIfCC<"CallingConv::X86_64_V8_CES", CCDelegateTo<CC_X86_64_V8_CES>>,
   CCIfCC<"CallingConv::X86_64_V8", CCDelegateTo<CC_X86_64_V8>>,
   CCIfCC<"CallingConv::GHC", CCDelegateTo<CC_X86_64_GHC>>,
   CCIfCC<"CallingConv::HiPE", CCDelegateTo<CC_X86_64_HiPE>>,
@@ -796,6 +809,9 @@ def CSR_Win64 : CalleeSavedRegs<(add RBX, RBP, RDI, RSI, R12, R13, R14, R15,
 // RAX, RBX, RCX, RDX are caller-saved
 // RSI, RDI, should always pe pushed onto the stack
 def CSR_X86_64_V8 : CalleeSavedRegs<(add RDI, RSI)>;
+
+// V8 CEntryStubs might clobber anything
+def CSR_X86_64_V8_CES : CalleeSavedRegs<(add RBP)>;
 
 // All GPRs - except r11
 def CSR_64_RT_MostRegs : CalleeSavedRegs<(add CSR_64, RAX, RCX, RDX, RSI, RDI,

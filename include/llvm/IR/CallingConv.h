@@ -151,6 +151,10 @@ namespace CallingConv {
 
     // Calling convention the V8 JavaScript JIT engine uses internally.
     X86_64_V8 = 81,
+
+    // Calling convention for calling V8's CEntryStubs
+    // (which call runtime functions)
+    X86_64_V8_CES = 82,
   };
 } // End CallingConv namespace
 
