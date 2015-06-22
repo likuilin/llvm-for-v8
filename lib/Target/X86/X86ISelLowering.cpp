@@ -3854,6 +3854,7 @@ bool X86::isCalleePop(CallingConv::ID CallingConv,
   default:
     return false;
   case CallingConv::X86_64_V8:
+  case CallingConv::X86_64_V8_S1:
     return true;
   case CallingConv::X86_StdCall:
   case CallingConv::X86_FastCall:

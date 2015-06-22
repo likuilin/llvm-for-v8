@@ -238,6 +238,10 @@ def CC_X86_64_V8_CES : CallingConv<[
   CCIfType<[i64], CCAssignToReg<[RAX, RBX, RSI]>>
 ]>;
 
+def CC_X86_64_V8_S1 : CallingConv<[
+  CCIfType<[i64], CCAssignToReg<[RSI, RDI, RBX, RCX, RDX]>>
+]>;
+
 // This is the root return-value convention for the X86-32 backend.
 def RetCC_X86_32 : CallingConv<[
   // If FastCC, use RetCC_X86_32_Fast.
@@ -258,6 +262,7 @@ def RetCC_X86_64 : CallingConv<[
   // V8 return
   CCIfCC<"CallingConv::X86_64_V8", CCDelegateTo<RetCC_X86_64_V8>>,
   CCIfCC<"CallingConv::X86_64_V8_CES", CCDelegateTo<RetCC_X86_64_V8_CES>>,
+  CCIfCC<"CallingConv::X86_64_V8_S1", CCDelegateTo<RetCC_X86_64_V8_CES>>, // sic
 
   // Handle JavaScript calls.
   CCIfCC<"CallingConv::WebKit_JS", CCDelegateTo<RetCC_X86_64_WebKit_JS>>,
@@ -767,6 +772,7 @@ def CC_X86_32 : CallingConv<[
 
 // This is the root argument convention for the X86-64 backend.
 def CC_X86_64 : CallingConv<[
+  CCIfCC<"CallingConv::X86_64_V8_S1", CCDelegateTo<CC_X86_64_V8_S1>>,
   CCIfCC<"CallingConv::X86_64_V8_CES", CCDelegateTo<CC_X86_64_V8_CES>>,
   CCIfCC<"CallingConv::X86_64_V8", CCDelegateTo<CC_X86_64_V8>>,
   CCIfCC<"CallingConv::GHC", CCDelegateTo<CC_X86_64_GHC>>,
@@ -832,6 +838,9 @@ def CSR_64_AllRegs     : CalleeSavedRegs<(add CSR_64_MostRegs, RAX, RSP,
 def CSR_64_AllRegs_AVX : CalleeSavedRegs<(sub (add CSR_64_MostRegs, RAX, RSP,
                                                    (sequence "YMM%u", 0, 31)),
                                               (sequence "XMM%u", 0, 15))>;
+
+// Stub is considered to not clobber any registers
+def CSR_X86_64_V8_S1 : CalleeSavedRegs<(add CSR_64_AllRegs)>;
 
 // Standard C + YMM6-15
 def CSR_Win64_Intel_OCL_BI_AVX : CalleeSavedRegs<(add RBX, RBP, RDI, RSI, R12,

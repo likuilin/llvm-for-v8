@@ -155,6 +155,10 @@ namespace CallingConv {
     // Calling convention for calling V8's CEntryStubs
     // (which call runtime functions)
     X86_64_V8_CES = 82,
+
+    // The following are the calling conventions
+    // for different kinds of V8 code stubs.
+    X86_64_V8_S1 = 83,
   };
 } // End CallingConv namespace
 

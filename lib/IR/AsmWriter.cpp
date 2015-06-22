@@ -302,6 +302,7 @@ static void PrintCallingConv(unsigned cc, raw_ostream &Out) {
   case CallingConv::WebKit_JS:     Out << "webkit_jscc"; break;
   case CallingConv::X86_64_V8:     Out << "x86_64_v8cc"; break;
   case CallingConv::X86_64_V8_CES: Out << "x86_64_v8_cescc"; break;
+  case CallingConv::X86_64_V8_S1:  Out << "x86_64_v8_s1cc"; break;
   case CallingConv::AnyReg:        Out << "anyregcc"; break;
   case CallingConv::PreserveMost:  Out << "preserve_mostcc"; break;
   case CallingConv::PreserveAll:   Out << "preserve_allcc"; break;
