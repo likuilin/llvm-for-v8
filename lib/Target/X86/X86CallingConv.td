@@ -240,7 +240,8 @@ def CC_X86_64_V8_CES : CallingConv<[
 ]>;
 
 def CC_X86_64_V8_S1 : CallingConv<[
-  CCIfType<[i64], CCAssignToReg<[RSI, RDI, RBX, RCX, RDX]>>
+  CCIfType<[i64], CCAssignToReg<[RSI, RDI, RBX, RCX, RDX]>>,
+  CCIfType<[i64, f64], CCAssignToStack<8, 0>>
 ]>;
 
 // This is the root return-value convention for the X86-32 backend.
