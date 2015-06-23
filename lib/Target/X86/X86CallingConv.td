@@ -235,7 +235,8 @@ def CC_X86_64_V8 : CallingConv<[
 def CC_X86_64_V8_CES : CallingConv<[
   // The first (and only) 3 args are: nargs for the runtime function,
   // address of the runtime funciton and the current JS context
-  CCIfType<[i64], CCAssignToReg<[RAX, RBX, RSI]>>
+  CCIfType<[i64], CCAssignToReg<[RAX, RBX, RSI]>>, 
+  CCIfType<[i64, f64], CCAssignToStack<8, 0>>
 ]>;
 
 def CC_X86_64_V8_S1 : CallingConv<[
