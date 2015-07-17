@@ -222,6 +222,10 @@ X86RegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
 
   assert(MF && "MachineFunction required");
   switch (MF->getFunction()->getCallingConv()) {
+  case CallingConv::X86_64_V8_S1:
+    return CSR_X86_64_V8_S1_SaveList;
+  case CallingConv::X86_64_V8_CES:
+    return CSR_X86_64_V8_CES_SaveList;
   case CallingConv::X86_64_V8:
     return CSR_X86_64_V8_SaveList;
   case CallingConv::GHC:
@@ -284,6 +288,10 @@ X86RegisterInfo::getCallPreservedMask(const MachineFunction &MF,
   bool HasAVX512 = Subtarget.hasAVX512();
 
   switch (CC) {
+  case CallingConv::X86_64_V8_CES:
+    return CSR_X86_64_V8_CES_RegMask;
+  case CallingConv::X86_64_V8_S1:
+    return CSR_X86_64_V8_S1_RegMask;
   case CallingConv::X86_64_V8:
     return CSR_X86_64_V8_RegMask;
   case CallingConv::GHC:

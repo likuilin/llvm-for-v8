@@ -814,13 +814,6 @@ def CSR_64EHRet : CalleeSavedRegs<(add RAX, RDX, CSR_64)>;
 def CSR_Win64 : CalleeSavedRegs<(add RBX, RBP, RDI, RSI, R12, R13, R14, R15,
                                      (sequence "XMM%u", 6, 15))>;
 
-// RAX, RBX, RCX, RDX are caller-saved
-// RSI, RDI, should always pe pushed onto the stack
-def CSR_X86_64_V8 : CalleeSavedRegs<(add RDI, RSI)>;
-
-// V8 CEntryStubs might clobber anything
-def CSR_X86_64_V8_CES : CalleeSavedRegs<(add RBP)>;
-
 // All GPRs - except r11
 def CSR_64_RT_MostRegs : CalleeSavedRegs<(add CSR_64, RAX, RCX, RDX, RSI, RDI,
                                               R8, R9, R10, RSP)>;
@@ -841,8 +834,15 @@ def CSR_64_AllRegs_AVX : CalleeSavedRegs<(sub (add CSR_64_MostRegs, RAX, RSP,
                                                    (sequence "YMM%u", 0, 31)),
                                               (sequence "XMM%u", 0, 15))>;
 
-// Stub is considered to not clobber any registers
-def CSR_X86_64_V8_S1 : CalleeSavedRegs<(add CSR_64_AllRegs)>;
+// RAX, RBX, RCX, RDX are caller-saved
+// RSI, RDI, should always pe pushed onto the stack
+def CSR_X86_64_V8 : CalleeSavedRegs<(add RDI, RSI)>;
+
+// V8 CEntryStubs might clobber anything
+def CSR_X86_64_V8_CES : CalleeSavedRegs<(add RBP)>;
+def CSR_X86_64_V8_S1 : CalleeSavedRegs<(add RBP)>;
+// Stub is considered to not clobber any registers (FIXME ??!!)
+// CalleeSavedRegs<(add CSR_64_AllRegs)>;
 
 // Standard C + YMM6-15
 def CSR_Win64_Intel_OCL_BI_AVX : CalleeSavedRegs<(add RBX, RBP, RDI, RSI, R12,
