@@ -159,6 +159,9 @@ namespace CallingConv {
     // The following are the calling conventions
     // for different kinds of V8 code stubs.
     X86_64_V8_S1 = 83,
+
+    // CallingConv for V8 MathPow call
+    X86_64_V8_S2,
   };
 } // End CallingConv namespace
 

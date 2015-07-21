@@ -207,6 +207,10 @@ def RetCC_X86_64_V8_CES : CallingConv<[
   CCIfType<[i64], CCAssignToReg<[RAX]>>
 ]>;
 
+def RetCC_X86_64_V8_S2 : CallingConv<[
+  CCIfType<[f32, f64, v16i8, v8i16, v4i32, v2i64, v4f32, v2f64], CCAssignToReg<[XMM3]>>
+]>;
+
 // X86-64 AnyReg return-value convention. No explicit register is specified for
 // the return-value. The register allocator is allowed and expected to choose
 // any free register.
@@ -244,6 +248,14 @@ def CC_X86_64_V8_S1 : CallingConv<[
   CCIfType<[i64, f64], CCAssignToStack<8, 0>>
 ]>;
 
+def CC_X86_64_V8_S2 : CallingConv<[
+  CCIfType<[i8, i16, i32], CCPromoteToType<i64>>,
+  CCIfType<[f32, f64, v16i8, v8i16, v4i32, v2i64, v4f32, v2f64], CCAssignToReg<[XMM2]>>,
+  CCIfType<[i64], CCAssignToReg<[RDX]>>,
+  CCIfType<[f64, f64], CCAssignToReg<[XMM2, XMM1]>>,
+  CCIfType<[f64, i64], CCAssignToStack<8, 0>>  
+]>;
+
 // This is the root return-value convention for the X86-32 backend.
 def RetCC_X86_32 : CallingConv<[
   // If FastCC, use RetCC_X86_32_Fast.
@@ -265,6 +277,7 @@ def RetCC_X86_64 : CallingConv<[
   CCIfCC<"CallingConv::X86_64_V8", CCDelegateTo<RetCC_X86_64_V8>>,
   CCIfCC<"CallingConv::X86_64_V8_CES", CCDelegateTo<RetCC_X86_64_V8_CES>>,
   CCIfCC<"CallingConv::X86_64_V8_S1", CCDelegateTo<RetCC_X86_64_V8_CES>>, // sic
+  CCIfCC<"CallingConv::X86_64_V8_S2", CCDelegateTo<RetCC_X86_64_V8_S2>>,
 
   // Handle JavaScript calls.
   CCIfCC<"CallingConv::WebKit_JS", CCDelegateTo<RetCC_X86_64_WebKit_JS>>,
@@ -776,6 +789,7 @@ def CC_X86_32 : CallingConv<[
 def CC_X86_64 : CallingConv<[
   CCIfCC<"CallingConv::X86_64_V8_S1", CCDelegateTo<CC_X86_64_V8_S1>>,
   CCIfCC<"CallingConv::X86_64_V8_CES", CCDelegateTo<CC_X86_64_V8_CES>>,
+  CCIfCC<"CallingConv::X86_64_V8_S2", CCDelegateTo<CC_X86_64_V8_S2>>,
   CCIfCC<"CallingConv::X86_64_V8", CCDelegateTo<CC_X86_64_V8>>,
   CCIfCC<"CallingConv::GHC", CCDelegateTo<CC_X86_64_GHC>>,
   CCIfCC<"CallingConv::HiPE", CCDelegateTo<CC_X86_64_HiPE>>,
