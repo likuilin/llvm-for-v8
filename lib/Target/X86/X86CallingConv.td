@@ -855,6 +855,7 @@ def CSR_X86_64_V8 : CalleeSavedRegs<(add RDI, RSI)>;
 // V8 CEntryStubs might clobber anything
 def CSR_X86_64_V8_CES : CalleeSavedRegs<(add RBP)>;
 def CSR_X86_64_V8_S1 : CalleeSavedRegs<(add RBP)>;
+def CSR_X86_64_V8_S2 : CalleeSavedRegs<(add RBP)>;
 // Stub is considered to not clobber any registers (FIXME ??!!)
 // CalleeSavedRegs<(add CSR_64_AllRegs)>;
 

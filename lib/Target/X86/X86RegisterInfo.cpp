@@ -222,6 +222,8 @@ X86RegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
 
   assert(MF && "MachineFunction required");
   switch (MF->getFunction()->getCallingConv()) {
+  case CallingConv::X86_64_V8_S2:
+    return CSR_X86_64_V8_S2_SaveList;
   case CallingConv::X86_64_V8_S1:
     return CSR_X86_64_V8_S1_SaveList;
   case CallingConv::X86_64_V8_CES:
@@ -292,6 +294,8 @@ X86RegisterInfo::getCallPreservedMask(const MachineFunction &MF,
     return CSR_X86_64_V8_CES_RegMask;
   case CallingConv::X86_64_V8_S1:
     return CSR_X86_64_V8_S1_RegMask;
+  case CallingConv::X86_64_V8_S2:
+    return CSR_X86_64_V8_S2_RegMask;
   case CallingConv::X86_64_V8:
     return CSR_X86_64_V8_RegMask;
   case CallingConv::GHC:
