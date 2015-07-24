@@ -207,6 +207,11 @@ def RetCC_X86_64_V8_CES : CallingConv<[
   CCIfType<[i64], CCAssignToReg<[RAX]>>
 ]>;
 
+def RetCC_X86_64_V8_RWS : CallingConv<[
+  // FIXME: it's void
+  CCIfType<[i64], CCAssignToReg<[RAX]>>
+]>;
+
 def RetCC_X86_64_V8_S2 : CallingConv<[
   CCIfType<[f32, f64, v16i8, v8i16, v4i32, v2i64, v4f32, v2f64], CCAssignToReg<[XMM3]>>
 ]>;
@@ -237,10 +242,16 @@ def CC_X86_64_V8 : CallingConv<[
 ]>;
 
 def CC_X86_64_V8_CES : CallingConv<[
-  // The first (and only) 3 args are: nargs for the runtime function,
+  // The first 3 args are: nargs for the runtime function,
   // address of the runtime funciton and the current JS context
-  CCIfType<[i64], CCAssignToReg<[RAX, RBX, RSI]>>, 
+  CCIfType<[i64], CCAssignToReg<[RAX, RBX, RSI]>>,
   CCIfType<[i64, f64], CCAssignToStack<8, 0>>
+]>;
+
+def CC_X86_64_V8_RWS : CallingConv<[
+  // The first (and only) 3 args are: object, map (new value),
+  // dst (object's field address)
+  CCIfType<[i64], CCAssignToReg<[RBX, RCX, RDX]>>
 ]>;
 
 def CC_X86_64_V8_S1 : CallingConv<[
@@ -250,10 +261,11 @@ def CC_X86_64_V8_S1 : CallingConv<[
 
 def CC_X86_64_V8_S2 : CallingConv<[
   CCIfType<[i8, i16, i32], CCPromoteToType<i64>>,
-  CCIfType<[f32, f64, v16i8, v8i16, v4i32, v2i64, v4f32, v2f64], CCAssignToReg<[XMM2]>>,
+  CCIfType<[f32, f64, v16i8, v8i16, v4i32, v2i64, v4f32, v2f64],
+    CCAssignToReg<[XMM2]>>,
   CCIfType<[i64], CCAssignToReg<[RDX]>>,
   CCIfType<[f64, f64], CCAssignToReg<[XMM2, XMM1]>>,
-  CCIfType<[f64, i64], CCAssignToStack<8, 0>>  
+  CCIfType<[f64, i64], CCAssignToStack<8, 0>>
 ]>;
 
 // This is the root return-value convention for the X86-32 backend.
@@ -277,6 +289,7 @@ def RetCC_X86_64 : CallingConv<[
   CCIfCC<"CallingConv::X86_64_V8", CCDelegateTo<RetCC_X86_64_V8>>,
   CCIfCC<"CallingConv::X86_64_V8_CES", CCDelegateTo<RetCC_X86_64_V8_CES>>,
   CCIfCC<"CallingConv::X86_64_V8_S1", CCDelegateTo<RetCC_X86_64_V8_CES>>, // sic
+  CCIfCC<"CallingConv::X86_64_V8_RWS", CCDelegateTo<RetCC_X86_64_V8_RWS>>,
   CCIfCC<"CallingConv::X86_64_V8_S2", CCDelegateTo<RetCC_X86_64_V8_S2>>,
 
   // Handle JavaScript calls.
@@ -789,6 +802,7 @@ def CC_X86_32 : CallingConv<[
 def CC_X86_64 : CallingConv<[
   CCIfCC<"CallingConv::X86_64_V8_S1", CCDelegateTo<CC_X86_64_V8_S1>>,
   CCIfCC<"CallingConv::X86_64_V8_CES", CCDelegateTo<CC_X86_64_V8_CES>>,
+  CCIfCC<"CallingConv::X86_64_V8_RWS", CCDelegateTo<CC_X86_64_V8_RWS>>,
   CCIfCC<"CallingConv::X86_64_V8_S2", CCDelegateTo<CC_X86_64_V8_S2>>,
   CCIfCC<"CallingConv::X86_64_V8", CCDelegateTo<CC_X86_64_V8>>,
   CCIfCC<"CallingConv::GHC", CCDelegateTo<CC_X86_64_GHC>>,
@@ -856,8 +870,10 @@ def CSR_X86_64_V8 : CalleeSavedRegs<(add RDI, RSI)>;
 def CSR_X86_64_V8_CES : CalleeSavedRegs<(add RBP)>;
 def CSR_X86_64_V8_S1 : CalleeSavedRegs<(add RBP)>;
 def CSR_X86_64_V8_S2 : CalleeSavedRegs<(add RBP)>;
-// Stub is considered to not clobber any registers (FIXME ??!!)
-// CalleeSavedRegs<(add CSR_64_AllRegs)>;
+// RCX is not saved, the rest seems to be.
+def CSR_X86_64_V8_RWS : CalleeSavedRegs<(add RAX, RDX,  RBX,  RBP,  RSI, RDI,
+                                         R8,  R9,  R10,  R11,  R12,  R13,  R14,
+                                         R15)>;
 
 // Standard C + YMM6-15
 def CSR_Win64_Intel_OCL_BI_AVX : CalleeSavedRegs<(add RBX, RBP, RDI, RSI, R12,

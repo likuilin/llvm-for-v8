@@ -97,7 +97,9 @@ namespace lltok {
     kw_webkit_jscc, kw_anyregcc,
     kw_x86_64_v8cc,
     kw_x86_64_v8_cescc,
+    kw_x86_64_v8_rwscc,
     kw_x86_64_v8_s1cc,
+    kw_x86_64_v8_s2cc,
     kw_preserve_mostcc, kw_preserve_allcc,
     kw_ghccc,
 

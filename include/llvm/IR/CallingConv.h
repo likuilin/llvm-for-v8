@@ -161,7 +161,10 @@ namespace CallingConv {
     X86_64_V8_S1 = 83,
 
     // CallingConv for V8 MathPow call
-    X86_64_V8_S2,
+    X86_64_V8_S2 = 84,
+
+    // RecordWriteStub
+    X86_64_V8_RWS = 85,
   };
 } // End CallingConv namespace
 
