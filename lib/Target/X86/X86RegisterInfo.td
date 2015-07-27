@@ -419,7 +419,7 @@ def GR64_NOREX_NOSP : RegisterClass<"X86", [i64], 64,
 def GR32_AD : RegisterClass<"X86", [i32], 32, (add EAX, EDX)>;
 
 // Scalar SSE2 floating point registers.
-def FR32 : RegisterClass<"X86", [f32], 32, (sequence "XMM%u", 0, 15)>;
+def FR32 : RegisterClass<"X86", [f32], 32, (sequence "XMM%u", 1, 15)>;
 
 def FR64 : RegisterClass<"X86", [f64], 64, (add FR32)>;
 
