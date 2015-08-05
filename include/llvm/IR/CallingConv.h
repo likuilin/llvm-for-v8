@@ -165,6 +165,12 @@ namespace CallingConv {
 
     // RecordWriteStub
     X86_64_V8_RWS = 85,
+
+    // CallNewArray
+    X86_64_V8_S3 = 86,
+
+    // StringAdd
+    X86_64_V8_S4 = 87,
   };
 } // End CallingConv namespace
 
