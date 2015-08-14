@@ -224,8 +224,12 @@ X86RegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
   switch (MF->getFunction()->getCallingConv()) {
   case CallingConv::X86_64_V8_S2:
     return CSR_X86_64_V8_S2_SaveList;
+  case CallingConv::X86_64_V8_S3:
+    return CSR_X86_64_V8_S3_SaveList;
   case CallingConv::X86_64_V8_S1:
     return CSR_X86_64_V8_S1_SaveList;
+  case CallingConv::X86_64_V8_S4:
+    return CSR_X86_64_V8_S4_SaveList;
   case CallingConv::X86_64_V8_CES:
     return CSR_X86_64_V8_CES_SaveList;
   case CallingConv::X86_64_V8_RWS:
@@ -298,6 +302,10 @@ X86RegisterInfo::getCallPreservedMask(const MachineFunction &MF,
     return CSR_X86_64_V8_RWS_RegMask;
   case CallingConv::X86_64_V8_S1:
     return CSR_X86_64_V8_S1_RegMask;
+  case CallingConv::X86_64_V8_S3:
+    return CSR_X86_64_V8_S3_RegMask;
+  case CallingConv::X86_64_V8_S4:
+    return CSR_X86_64_V8_S4_RegMask;
   case CallingConv::X86_64_V8_S2:
     return CSR_X86_64_V8_S2_RegMask;
   case CallingConv::X86_64_V8:
