@@ -243,7 +243,7 @@ def CC_X86_64_V8 : CallingConv<[
   CCIfType<[i8, i16, i32], CCPromoteToType<i64>>,
 
   // First two arguments are context and callee's JSFunction object
-  CCIfType<[i64], CCAssignToReg<[RSI, RDI]>>,
+  CCIfType<[i64], CCAssignToReg<[RSI, RDI, RBX]>>,
 
   // The remaining integer arguments are passed on the stack.
   // 64bit integer and floating-point arguments are default-aligned and stored
