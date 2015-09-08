@@ -538,7 +538,7 @@ int MachineFrameInfo::CreateStackObject(uint64_t Size, unsigned Alignment,
 /// Create a new statically sized stack object that represents a spill slot,
 /// returning a nonnegative identifier to represent it.
 int MachineFrameInfo::CreateSpillStackObject(uint64_t Size,
-                                             unsigned Alignment, int osr_reserve) {
+                                             unsigned Alignment) {
   Alignment = clampStackAlignment(!StackRealignable || !RealignOption,
                                   Alignment, StackAlignment);
   CreateStackObject(Size, Alignment, true);

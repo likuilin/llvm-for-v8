@@ -559,7 +559,7 @@ public:
 
   /// Create a new statically sized stack object that represents a spill slot,
   /// returning a nonnegative identifier to represent it.
-  int CreateSpillStackObject(uint64_t Size, unsigned Alignment, int osr_reserve = 0);
+  int CreateSpillStackObject(uint64_t Size, unsigned Alignment);
 
   /// Remove or mark dead a statically sized stack object.
   void RemoveStackObject(int ObjectIdx) {
