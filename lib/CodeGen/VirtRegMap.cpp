@@ -75,6 +75,12 @@ void VirtRegMap::grow() {
 }
 
 unsigned VirtRegMap::createSpillSlot(const TargetRegisterClass *RC) {
+  const Function* f = MF->getFunction();
+  if (NumSpillSlots == 0) {
+    for (int i = 0; i < f->osr_reserve; ++i) 
+       MF->getFrameInfo()->CreateSpillStackObject(RC->getSize(),
+                                                      RC->getAlignment());
+  }
   int SS = MF->getFrameInfo()->CreateSpillStackObject(RC->getSize(),
                                                       RC->getAlignment());
   ++NumSpillSlots;

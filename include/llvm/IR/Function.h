@@ -605,7 +605,7 @@ public:
   ///
   /// Drop all metadata from \c this not included in \c KnownIDs.
   void dropUnknownMetadata(ArrayRef<unsigned> KnownIDs);
-
+  int osr_reserve;
 private:
   // Shadow Value::setValueSubclassData with a private forwarding method so that
   // subclasses cannot accidentally use it.
@@ -621,6 +621,7 @@ private:
   }
 
   void clearMetadata();
+  
 };
 
 inline ValueSymbolTable *

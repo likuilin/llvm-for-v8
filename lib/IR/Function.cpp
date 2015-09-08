@@ -253,6 +253,7 @@ Function::Function(FunctionType *Ty, LinkageTypes Linkage, const Twine &name,
       Ty(Ty) {
   assert(FunctionType::isValidReturnType(getReturnType()) &&
          "invalid return type");
+  osr_reserve = 0;
   setGlobalObjectSubClassData(0);
   SymTab = new ValueSymbolTable();
 
