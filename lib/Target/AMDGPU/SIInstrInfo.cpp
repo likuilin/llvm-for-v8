@@ -82,6 +82,7 @@ bool SIInstrInfo::isReallyTriviallyReMaterializable(const MachineInstr *MI,
   switch (MI->getOpcode()) {
   case AMDGPU::V_MOV_B32_e32:
   case AMDGPU::V_MOV_B32_e64:
+  case AMDGPU::V_MOV_B64_PSEUDO:
     return true;
   default:
     return false;
@@ -508,14 +509,23 @@ void SIInstrInfo::storeRegToStackSlot(MachineBasicBlock &MBB,
   }
 
   if (Opcode != -1) {
+    MachinePointerInfo PtrInfo
+      = MachinePointerInfo::getFixedStack(*MF, FrameIndex);
+    unsigned Size = FrameInfo->getObjectSize(FrameIndex);
+    unsigned Align = FrameInfo->getObjectAlignment(FrameIndex);
+    MachineMemOperand *MMO
+      = MF->getMachineMemOperand(PtrInfo, MachineMemOperand::MOStore,
+                                 Size, Align);
+
     FrameInfo->setObjectAlignment(FrameIndex, 4);
     BuildMI(MBB, MI, DL, get(Opcode))
-            .addReg(SrcReg)
-            .addFrameIndex(FrameIndex)
-            // Place-holder registers, these will be filled in by
-            // SIPrepareScratchRegs.
-            .addReg(AMDGPU::SGPR0_SGPR1_SGPR2_SGPR3, RegState::Undef)
-            .addReg(AMDGPU::SGPR0, RegState::Undef);
+      .addReg(SrcReg)
+      .addFrameIndex(FrameIndex)
+      // Place-holder registers, these will be filled in by
+      // SIPrepareScratchRegs.
+      .addReg(AMDGPU::SGPR0_SGPR1_SGPR2_SGPR3, RegState::Undef)
+      .addReg(AMDGPU::SGPR0, RegState::Undef)
+      .addMemOperand(MMO);
   } else {
     LLVMContext &Ctx = MF->getFunction()->getContext();
     Ctx.emitError("SIInstrInfo::storeRegToStackSlot - Do not know how to"
@@ -556,14 +566,22 @@ void SIInstrInfo::loadRegFromStackSlot(MachineBasicBlock &MBB,
   }
 
   if (Opcode != -1) {
-    FrameInfo->setObjectAlignment(FrameIndex, 4);
-    BuildMI(MBB, MI, DL, get(Opcode), DestReg)
-            .addFrameIndex(FrameIndex)
-            // Place-holder registers, these will be filled in by
-            // SIPrepareScratchRegs.
-            .addReg(AMDGPU::SGPR0_SGPR1_SGPR2_SGPR3, RegState::Undef)
-            .addReg(AMDGPU::SGPR0, RegState::Undef);
+    unsigned Align = 4;
+    FrameInfo->setObjectAlignment(FrameIndex, Align);
+    unsigned Size = FrameInfo->getObjectSize(FrameIndex);
 
+    MachinePointerInfo PtrInfo
+      = MachinePointerInfo::getFixedStack(*MF, FrameIndex);
+    MachineMemOperand *MMO = MF->getMachineMemOperand(
+      PtrInfo, MachineMemOperand::MOLoad, Size, Align);
+
+    BuildMI(MBB, MI, DL, get(Opcode), DestReg)
+      .addFrameIndex(FrameIndex)
+      // Place-holder registers, these will be filled in by
+      // SIPrepareScratchRegs.
+      .addReg(AMDGPU::SGPR0_SGPR1_SGPR2_SGPR3, RegState::Undef)
+      .addReg(AMDGPU::SGPR0, RegState::Undef)
+      .addMemOperand(MMO);
   } else {
     LLVMContext &Ctx = MF->getFunction()->getContext();
     Ctx.emitError("SIInstrInfo::loadRegFromStackSlot - Do not know how to"
@@ -979,9 +997,6 @@ bool SIInstrInfo::FoldImmediate(MachineInstr *UseMI, MachineInstr *DefMI,
           AMDGPU::getNamedOperandIdx(Opc, AMDGPU::OpName::src2));
       }
 
-      UseMI->RemoveOperand(AMDGPU::getNamedOperandIdx(Opc,
-                                                      AMDGPU::OpName::src2));
-      // ChangingToImmediate adds Src2 back to the instruction.
       Src2->ChangeToImmediate(Imm);
 
       removeModOperands(*UseMI);
@@ -1811,15 +1826,10 @@ void SIInstrInfo::legalizeOperands(MachineInstr *MI) const {
     }
 
     MachineBasicBlock &MBB = *MI->getParent();
+
     // Extract the ptr from the resource descriptor.
-
-    // SRsrcPtrLo = srsrc:sub0
-    unsigned SRsrcPtrLo = buildExtractSubReg(MI, MRI, *SRsrc,
-        &AMDGPU::VReg_128RegClass, AMDGPU::sub0, &AMDGPU::VGPR_32RegClass);
-
-    // SRsrcPtrHi = srsrc:sub1
-    unsigned SRsrcPtrHi = buildExtractSubReg(MI, MRI, *SRsrc,
-        &AMDGPU::VReg_128RegClass, AMDGPU::sub1, &AMDGPU::VGPR_32RegClass);
+    unsigned SRsrcPtr = buildExtractSubReg(MI, MRI, *SRsrc,
+      &AMDGPU::VReg_128RegClass, AMDGPU::sub0_sub1, &AMDGPU::VReg_64RegClass);
 
     // Create an empty resource descriptor
     unsigned Zero64 = MRI.createVirtualRegister(&AMDGPU::SReg_64RegClass);
@@ -1844,40 +1854,39 @@ void SIInstrInfo::legalizeOperands(MachineInstr *MI) const {
             .addImm(RsrcDataFormat >> 32);
 
     // NewSRsrc = {Zero64, SRsrcFormat}
-    BuildMI(MBB, MI, MI->getDebugLoc(), get(AMDGPU::REG_SEQUENCE),
-            NewSRsrc)
-            .addReg(Zero64)
-            .addImm(AMDGPU::sub0_sub1)
-            .addReg(SRsrcFormatLo)
-            .addImm(AMDGPU::sub2)
-            .addReg(SRsrcFormatHi)
-            .addImm(AMDGPU::sub3);
+    BuildMI(MBB, MI, MI->getDebugLoc(), get(AMDGPU::REG_SEQUENCE), NewSRsrc)
+      .addReg(Zero64)
+      .addImm(AMDGPU::sub0_sub1)
+      .addReg(SRsrcFormatLo)
+      .addImm(AMDGPU::sub2)
+      .addReg(SRsrcFormatHi)
+      .addImm(AMDGPU::sub3);
 
     MachineOperand *VAddr = getNamedOperand(*MI, AMDGPU::OpName::vaddr);
     unsigned NewVAddr = MRI.createVirtualRegister(&AMDGPU::VReg_64RegClass);
-    unsigned NewVAddrLo;
-    unsigned NewVAddrHi;
     if (VAddr) {
       // This is already an ADDR64 instruction so we need to add the pointer
       // extracted from the resource descriptor to the current value of VAddr.
-      NewVAddrLo = MRI.createVirtualRegister(&AMDGPU::VGPR_32RegClass);
-      NewVAddrHi = MRI.createVirtualRegister(&AMDGPU::VGPR_32RegClass);
+      unsigned NewVAddrLo = MRI.createVirtualRegister(&AMDGPU::VGPR_32RegClass);
+      unsigned NewVAddrHi = MRI.createVirtualRegister(&AMDGPU::VGPR_32RegClass);
 
-      // NewVaddrLo = SRsrcPtrLo + VAddr:sub0
-      BuildMI(MBB, MI, MI->getDebugLoc(), get(AMDGPU::V_ADD_I32_e32),
-              NewVAddrLo)
-              .addReg(SRsrcPtrLo)
-              .addReg(VAddr->getReg(), 0, AMDGPU::sub0)
-              .addReg(AMDGPU::VCC, RegState::ImplicitDefine);
+      // NewVaddrLo = SRsrcPtr:sub0 + VAddr:sub0
+      DebugLoc DL = MI->getDebugLoc();
+      BuildMI(MBB, MI, DL, get(AMDGPU::V_ADD_I32_e32), NewVAddrLo)
+        .addReg(SRsrcPtr, 0, AMDGPU::sub0)
+        .addReg(VAddr->getReg(), 0, AMDGPU::sub0);
 
-      // NewVaddrHi = SRsrcPtrHi + VAddr:sub1
-      BuildMI(MBB, MI, MI->getDebugLoc(), get(AMDGPU::V_ADDC_U32_e32),
-              NewVAddrHi)
-              .addReg(SRsrcPtrHi)
-              .addReg(VAddr->getReg(), 0, AMDGPU::sub1)
-              .addReg(AMDGPU::VCC, RegState::ImplicitDefine)
-              .addReg(AMDGPU::VCC, RegState::Implicit);
+      // NewVaddrHi = SRsrcPtr:sub1 + VAddr:sub1
+      BuildMI(MBB, MI, DL, get(AMDGPU::V_ADDC_U32_e32), NewVAddrHi)
+        .addReg(SRsrcPtr, 0, AMDGPU::sub1)
+        .addReg(VAddr->getReg(), 0, AMDGPU::sub1);
 
+      // NewVaddr = {NewVaddrHi, NewVaddrLo}
+      BuildMI(MBB, MI, MI->getDebugLoc(), get(AMDGPU::REG_SEQUENCE), NewVAddr)
+        .addReg(NewVAddrLo)
+        .addImm(AMDGPU::sub0)
+        .addReg(NewVAddrHi)
+        .addImm(AMDGPU::sub1);
     } else {
       // This instructions is the _OFFSET variant, so we need to convert it to
       // ADDR64.
@@ -1888,35 +1897,32 @@ void SIInstrInfo::legalizeOperands(MachineInstr *MI) const {
       // Create the new instruction.
       unsigned Addr64Opcode = AMDGPU::getAddr64Inst(MI->getOpcode());
       MachineInstr *Addr64 =
-          BuildMI(MBB, MI, MI->getDebugLoc(), get(Addr64Opcode))
-                  .addOperand(*VData)
-                  .addReg(AMDGPU::NoRegister) // Dummy value for vaddr.
-                                              // This will be replaced later
-                                              // with the new value of vaddr.
-                  .addOperand(*SRsrc)
-                  .addOperand(*SOffset)
-                  .addOperand(*Offset)
-                  .addImm(0) // glc
-                  .addImm(0) // slc
-                  .addImm(0); // tfe
+        BuildMI(MBB, MI, MI->getDebugLoc(), get(Addr64Opcode))
+        .addOperand(*VData)
+        .addReg(AMDGPU::NoRegister) // Dummy value for vaddr.
+                                    // This will be replaced later
+                                    // with the new value of vaddr.
+        .addOperand(*SRsrc)
+        .addOperand(*SOffset)
+        .addOperand(*Offset)
+        .addImm(0) // glc
+        .addImm(0) // slc
+        .addImm(0) // tfe
+        .setMemRefs(MI->memoperands_begin(), MI->memoperands_end());
 
       MI->removeFromParent();
       MI = Addr64;
 
-      NewVAddrLo = SRsrcPtrLo;
-      NewVAddrHi = SRsrcPtrHi;
+      // NewVaddr = {NewVaddrHi, NewVaddrLo}
+      BuildMI(MBB, MI, MI->getDebugLoc(), get(AMDGPU::REG_SEQUENCE), NewVAddr)
+        .addReg(SRsrcPtr, 0, AMDGPU::sub0)
+        .addImm(AMDGPU::sub0)
+        .addReg(SRsrcPtr, 0, AMDGPU::sub1)
+        .addImm(AMDGPU::sub1);
+
       VAddr = getNamedOperand(*MI, AMDGPU::OpName::vaddr);
       SRsrc = getNamedOperand(*MI, AMDGPU::OpName::srsrc);
     }
-
-    // NewVaddr = {NewVaddrHi, NewVaddrLo}
-    BuildMI(MBB, MI, MI->getDebugLoc(), get(AMDGPU::REG_SEQUENCE),
-            NewVAddr)
-            .addReg(NewVAddrLo)
-            .addImm(AMDGPU::sub0)
-            .addReg(NewVAddrHi)
-            .addImm(AMDGPU::sub1);
-
 
     // Update the instruction to use NewVaddr
     VAddr->setReg(NewVAddr);

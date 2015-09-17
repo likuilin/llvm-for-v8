@@ -28,6 +28,7 @@
 #include "llvm/Analysis/AssumptionCache.h"
 #include "llvm/Analysis/CFG.h"
 #include "llvm/Analysis/ConstantFolding.h"
+#include "llvm/Analysis/GlobalsModRef.h"
 #include "llvm/Analysis/InstructionSimplify.h"
 #include "llvm/Analysis/Loads.h"
 #include "llvm/Analysis/MemoryBuiltins.h"
@@ -693,10 +694,10 @@ namespace {
       AU.addRequired<TargetLibraryInfoWrapperPass>();
       if (!NoLoads)
         AU.addRequired<MemoryDependenceAnalysis>();
-      AU.addRequired<AliasAnalysis>();
+      AU.addRequired<AAResultsWrapperPass>();
 
       AU.addPreserved<DominatorTreeWrapperPass>();
-      AU.addPreserved<AliasAnalysis>();
+      AU.addPreserved<GlobalsAAWrapperPass>();
     }
 
 
@@ -745,7 +746,8 @@ INITIALIZE_PASS_DEPENDENCY(AssumptionCacheTracker)
 INITIALIZE_PASS_DEPENDENCY(MemoryDependenceAnalysis)
 INITIALIZE_PASS_DEPENDENCY(DominatorTreeWrapperPass)
 INITIALIZE_PASS_DEPENDENCY(TargetLibraryInfoWrapperPass)
-INITIALIZE_AG_DEPENDENCY(AliasAnalysis)
+INITIALIZE_PASS_DEPENDENCY(AAResultsWrapperPass)
+INITIALIZE_PASS_DEPENDENCY(GlobalsAAWrapperPass)
 INITIALIZE_PASS_END(GVN, "gvn", "Global Value Numbering", false, false)
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
@@ -1771,8 +1773,24 @@ bool GVN::processAssumeIntrinsic(IntrinsicInst *IntrinsicI) {
   assert(IntrinsicI->getIntrinsicID() == Intrinsic::assume &&
          "This function can only be called with llvm.assume intrinsic");
   Value *V = IntrinsicI->getArgOperand(0);
+
+  if (ConstantInt *Cond = dyn_cast<ConstantInt>(V)) {
+    if (Cond->isZero()) {
+      Type *Int8Ty = Type::getInt8Ty(V->getContext());
+      // Insert a new store to null instruction before the load to indicate that
+      // this code is not reachable.  FIXME: We could insert unreachable
+      // instruction directly because we can modify the CFG.
+      new StoreInst(UndefValue::get(Int8Ty),
+                    Constant::getNullValue(Int8Ty->getPointerTo()),
+                    IntrinsicI);
+    }
+    markInstructionForDeletion(IntrinsicI);
+    return false;
+  }
+
   Constant *True = ConstantInt::getTrue(V->getContext());
   bool Changed = false;
+
   for (BasicBlock *Successor : successors(IntrinsicI->getParent())) {
     BasicBlockEdge Edge(IntrinsicI->getParent(), Successor);
 
@@ -1780,6 +1798,7 @@ bool GVN::processAssumeIntrinsic(IntrinsicInst *IntrinsicI) {
     // will check dominance for us.
     Changed |= propagateEquality(V, True, Edge, false);
   }
+
   // We can replace assume value with true, which covers cases like this:
   // call void @llvm.assume(i1 %cmp)
   // br i1 %cmp, label %bb1, label %bb2 ; will change %cmp to true
@@ -2087,6 +2106,8 @@ bool GVN::replaceOperandsWithConsts(Instruction *Instr) const {
     Value *Operand = Instr->getOperand(OpNum);
     auto it = ReplaceWithConstMap.find(Operand);
     if (it != ReplaceWithConstMap.end()) {
+      assert(!isa<Constant>(Operand) &&
+             "Replacing constants with constants is invalid");
       Instr->setOperand(OpNum, it->second);
       Changed = true;
     }
@@ -2391,7 +2412,7 @@ bool GVN::runOnFunction(Function& F) {
   DT = &getAnalysis<DominatorTreeWrapperPass>().getDomTree();
   AC = &getAnalysis<AssumptionCacheTracker>().getAssumptionCache(F);
   TLI = &getAnalysis<TargetLibraryInfoWrapperPass>().getTLI();
-  VN.setAliasAnalysis(&getAnalysis<AliasAnalysis>());
+  VN.setAliasAnalysis(&getAnalysis<AAResultsWrapperPass>().getAAResults());
   VN.setMemDep(MD);
   VN.setDomTree(DT);
 
@@ -2459,8 +2480,8 @@ bool GVN::processBlock(BasicBlock *BB) {
        BI != BE;) {
     if (!ReplaceWithConstMap.empty())
       ChangedFunction |= replaceOperandsWithConsts(BI);
-
     ChangedFunction |= processInstruction(BI);
+
     if (InstrsToErase.empty()) {
       ++BI;
       continue;

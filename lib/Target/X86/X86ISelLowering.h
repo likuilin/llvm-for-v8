@@ -182,6 +182,8 @@ namespace llvm {
 
       /// Compute Sum of Absolute Differences.
       PSADBW,
+      /// Compute Double Block Packed Sum-Absolute-Differences
+      DBPSADBW,
 
       /// Bitwise Logical AND NOT of Packed FP values.
       ANDNP,
@@ -211,6 +213,8 @@ namespace llvm {
 
       // FP vector get exponent 
       FGETEXP_RND,
+      // Extract Normalized Mantissas
+      VGETMANT,
       // FP Scale
       SCALEF,
       // Integer add/sub with unsigned saturation.
@@ -235,6 +239,9 @@ namespace llvm {
 
       // Integer absolute value
       ABS,
+
+      // Detect Conflicts Within a Vector
+      CONFLICT,
 
       /// Floating point max and min.
       FMAX, FMIN,
@@ -261,7 +268,13 @@ namespace llvm {
       // Exception Handling helpers.
       EH_RETURN,
 
+      // CATCHRET - Represents a return from a catch block funclet. Used for
+      // MSVC compatible exception handling. Takes a chain operand and RAX.
       CATCHRET,
+
+      // CLEANUPRET - Represents a return from a cleanup block funclet.  Used
+      // for MSVC compatible exception handling. Takes only a chain operand.
+      CLEANUPRET,
 
       // SjLj exception handling setjmp.
       EH_SJLJ_SETJMP,
@@ -350,6 +363,7 @@ namespace llvm {
 
       // OR/AND test for masks
       KORTEST,
+      KTEST,
 
       // Several flavors of instructions with vector shuffle behaviors.
       PACKSS,
@@ -1001,6 +1015,7 @@ namespace llvm {
     SDValue LowerFRAME_TO_ARGS_OFFSET(SDValue Op, SelectionDAG &DAG) const;
     SDValue LowerEH_RETURN(SDValue Op, SelectionDAG &DAG) const;
     SDValue LowerCATCHRET(SDValue Op, SelectionDAG &DAG) const;
+    SDValue LowerCLEANUPRET(SDValue Op, SelectionDAG &DAG) const;
     SDValue lowerEH_SJLJ_SETJMP(SDValue Op, SelectionDAG &DAG) const;
     SDValue lowerEH_SJLJ_LONGJMP(SDValue Op, SelectionDAG &DAG) const;
     SDValue LowerINIT_TRAMPOLINE(SDValue Op, SelectionDAG &DAG) const;
@@ -1038,9 +1053,10 @@ namespace llvm {
 
     const MCPhysReg *getScratchRegisters(CallingConv::ID CC) const override;
 
-    bool shouldExpandAtomicLoadInIR(LoadInst *SI) const override;
+    TargetLoweringBase::AtomicExpansionKind
+    shouldExpandAtomicLoadInIR(LoadInst *SI) const override;
     bool shouldExpandAtomicStoreInIR(StoreInst *SI) const override;
-    TargetLoweringBase::AtomicRMWExpansionKind
+    TargetLoweringBase::AtomicExpansionKind
     shouldExpandAtomicRMWInIR(AtomicRMWInst *AI) const override;
 
     LoadInst *

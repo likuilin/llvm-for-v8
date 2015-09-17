@@ -3147,10 +3147,46 @@ bool llvm::isSafeToSpeculativelyExecute(const Value *V,
         LI->getPointerOperand(), LI->getAlignment(), DL, CtxI, DT, TLI);
   }
   case Instruction::Call: {
-    if (cast<CallInst>(Inst)->doesNotAccessMemory())
-      return true;
+    if (const IntrinsicInst *II = dyn_cast<IntrinsicInst>(Inst)) {
+      switch (II->getIntrinsicID()) {
+      // These synthetic intrinsics have no side-effects and just mark
+      // information about their operands.
+      // FIXME: There are other no-op synthetic instructions that potentially
+      // should be considered at least *safe* to speculate...
+      case Intrinsic::dbg_declare:
+      case Intrinsic::dbg_value:
+        return true;
+
+      case Intrinsic::bswap:
+      case Intrinsic::ctlz:
+      case Intrinsic::ctpop:
+      case Intrinsic::cttz:
+      case Intrinsic::objectsize:
+      case Intrinsic::sadd_with_overflow:
+      case Intrinsic::smul_with_overflow:
+      case Intrinsic::ssub_with_overflow:
+      case Intrinsic::uadd_with_overflow:
+      case Intrinsic::umul_with_overflow:
+      case Intrinsic::usub_with_overflow:
+        return true;
+      // Sqrt should be OK, since the llvm sqrt intrinsic isn't defined to set
+      // errno like libm sqrt would.
+      case Intrinsic::sqrt:
+      case Intrinsic::fma:
+      case Intrinsic::fmuladd:
+      case Intrinsic::fabs:
+      case Intrinsic::minnum:
+      case Intrinsic::maxnum:
+        return true;
+      // TODO: some fp intrinsics are marked as having the same error handling
+      // as libm. They're safe to speculate when they won't error.
+      // TODO: are convert_{from,to}_fp16 safe?
+      // TODO: can we list target-specific intrinsics here?
+      default: break;
+      }
+    }
     return false; // The called function could have undefined behavior or
-                  // side-effects.
+                  // side-effects, even if marked readnone nounwind.
   }
   case Instruction::VAArg:
   case Instruction::Alloca:
@@ -3171,6 +3207,7 @@ bool llvm::isSafeToSpeculativelyExecute(const Value *V,
   case Instruction::CatchEndPad:
   case Instruction::CatchRet:
   case Instruction::CleanupPad:
+  case Instruction::CleanupEndPad:
   case Instruction::CleanupRet:
   case Instruction::TerminatePad:
     return false; // Misc instructions which have effects
@@ -3183,6 +3220,8 @@ bool llvm::mayBeMemoryDependent(const Instruction &I) {
 
 /// Return true if we know that the specified value is never null.
 bool llvm::isKnownNonNull(const Value *V, const TargetLibraryInfo *TLI) {
+  assert(V->getType()->isPointerTy() && "V must be pointer type");
+
   // Alloca never returns null, malloc might.
   if (isa<AllocaInst>(V)) return true;
 
@@ -3215,6 +3254,8 @@ bool llvm::isKnownNonNull(const Value *V, const TargetLibraryInfo *TLI) {
 static bool isKnownNonNullFromDominatingCondition(const Value *V,
                                                   const Instruction *CtxI,
                                                   const DominatorTree *DT) {
+  assert(V->getType()->isPointerTy() && "V must be pointer type");
+
   unsigned NumUsesExplored = 0;
   for (auto U : V->users()) {
     // Avoid massive lists
@@ -3714,13 +3755,25 @@ static SelectPatternResult matchSelectPattern(CmpInst::Predicate Pred,
   return {SPF_UNKNOWN, SPNB_NA, false};
 }
 
-static Constant *lookThroughCast(CmpInst *CmpI, Value *V1, Value *V2,
-                                 Instruction::CastOps *CastOp) {
+static Value *lookThroughCast(CmpInst *CmpI, Value *V1, Value *V2,
+                              Instruction::CastOps *CastOp) {
   CastInst *CI = dyn_cast<CastInst>(V1);
   Constant *C = dyn_cast<Constant>(V2);
-  if (!CI || !C)
+  CastInst *CI2 = dyn_cast<CastInst>(V2);
+  if (!CI)
     return nullptr;
   *CastOp = CI->getOpcode();
+
+  if (CI2) {
+    // If V1 and V2 are both the same cast from the same type, we can look
+    // through V1.
+    if (CI2->getOpcode() == CI->getOpcode() &&
+        CI2->getSrcTy() == CI->getSrcTy())
+      return CI2->getOperand(0);
+    return nullptr;
+  } else if (!C) {
+    return nullptr;
+  }
 
   if (isa<SExtInst>(CI) && CmpI->isSigned()) {
     Constant *T = ConstantExpr::getTrunc(C, CI->getSrcTy());
@@ -3781,11 +3834,11 @@ SelectPatternResult llvm::matchSelectPattern(Value *V,
 
   // Deal with type mismatches.
   if (CastOp && CmpLHS->getType() != TrueVal->getType()) {
-    if (Constant *C = lookThroughCast(CmpI, TrueVal, FalseVal, CastOp))
+    if (Value *C = lookThroughCast(CmpI, TrueVal, FalseVal, CastOp))
       return ::matchSelectPattern(Pred, FMF, CmpLHS, CmpRHS,
                                   cast<CastInst>(TrueVal)->getOperand(0), C,
                                   LHS, RHS);
-    if (Constant *C = lookThroughCast(CmpI, FalseVal, TrueVal, CastOp))
+    if (Value *C = lookThroughCast(CmpI, FalseVal, TrueVal, CastOp))
       return ::matchSelectPattern(Pred, FMF, CmpLHS, CmpRHS,
                                   C, cast<CastInst>(FalseVal)->getOperand(0),
                                   LHS, RHS);
