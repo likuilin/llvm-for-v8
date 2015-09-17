@@ -231,7 +231,7 @@ X86RegisterInfo::getCalleeSavedRegs(const MachineFunction *MF) const {
   case CallingConv::X86_64_V8_S4:
     return CSR_X86_64_V8_S4_SaveList;
   case CallingConv::X86_64_V8_S5:
-    return CSR_X86_64_V8_S5_SaveList
+    return CSR_X86_64_V8_S5_SaveList;
   case CallingConv::X86_64_V8_CES:
     return CSR_X86_64_V8_CES_SaveList;
   case CallingConv::X86_64_V8_RWS:

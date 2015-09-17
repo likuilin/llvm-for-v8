@@ -326,7 +326,7 @@ def RetCC_X86_64 : CallingConv<[
   CCIfCC<"CallingConv::X86_64_V8_S2", CCDelegateTo<RetCC_X86_64_V8_S2>>,
   CCIfCC<"CallingConv::X86_64_V8_S3", CCDelegateTo<RetCC_X86_64_V8_S3>>,
   CCIfCC<"CallingConv::X86_64_V8_S4", CCDelegateTo<RetCC_X86_64_V8_S4>>,
-  CCIfCC<"CallingConv::X86_64_V8_S5", CCDelegateTO<RetCC_X86_64_V8_S5>>,
+  CCIfCC<"CallingConv::X86_64_V8_S5", CCDelegateTo<RetCC_X86_64_V8_S5>>,
 
   // Handle JavaScript calls.
   CCIfCC<"CallingConv::WebKit_JS", CCDelegateTo<RetCC_X86_64_WebKit_JS>>,
@@ -842,7 +842,7 @@ def CC_X86_64 : CallingConv<[
   CCIfCC<"CallingConv::X86_64_V8_S2", CCDelegateTo<CC_X86_64_V8_S2>>,
   CCIfCC<"CallingConv::X86_64_V8_S3", CCDelegateTo<CC_X86_64_V8_S3>>,
   CCIfCC<"CallingConv::X86_64_V8_S4", CCDelegateTo<CC_X86_64_V8_S4>>,
-  CCIfCC<"CallingConv::X86_64_V8_S5", CCDelegateTo<CC_X86_64_V8_S5>,
+  CCIfCC<"CallingConv::X86_64_V8_S5", CCDelegateTo<CC_X86_64_V8_S5>>,
   CCIfCC<"CallingConv::X86_64_V8", CCDelegateTo<CC_X86_64_V8>>,
   CCIfCC<"CallingConv::GHC", CCDelegateTo<CC_X86_64_GHC>>,
   CCIfCC<"CallingConv::HiPE", CCDelegateTo<CC_X86_64_HiPE>>,
