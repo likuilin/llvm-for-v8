@@ -171,6 +171,9 @@ namespace CallingConv {
 
     // StringAdd
     X86_64_V8_S4 = 87,
+    
+    //LoadNamedGeneric
+    X86_64_V8_S5 = 88,
   };
 } // End CallingConv namespace
 

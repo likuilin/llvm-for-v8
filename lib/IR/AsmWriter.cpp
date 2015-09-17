@@ -307,6 +307,7 @@ static void PrintCallingConv(unsigned cc, raw_ostream &Out) {
   case CallingConv::X86_64_V8_S2:  Out << "x86_64_v8_s2cc"; break;
   case CallingConv::X86_64_V8_S3:  Out << "x86_64_v8_s3cc"; break;
   case CallingConv::X86_64_V8_S4:  Out << "x86_64_v8_s4cc"; break;
+  case CallingConv::X86_64_V8_S5:  Out << "x86_64_v8_s5cc"; break;
   case CallingConv::AnyReg:        Out << "anyregcc"; break;
   case CallingConv::PreserveMost:  Out << "preserve_mostcc"; break;
   case CallingConv::PreserveAll:   Out << "preserve_allcc"; break;
