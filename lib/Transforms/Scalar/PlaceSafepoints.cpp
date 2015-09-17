@@ -511,17 +511,22 @@ static bool shouldRewriteFunction(Function &F) {
     const char *FunctionGCName = F.getGC();
     const StringRef StatepointExampleName("statepoint-example");
     const StringRef CoreCLRName("coreclr");
+    const StringRef V8GCName("v8-gc");
     return (StatepointExampleName == FunctionGCName) ||
-           (CoreCLRName == FunctionGCName);
+           (CoreCLRName == FunctionGCName) ||
+           (V8GCName == FunctionGCName);
   } else
     return false;
 }
 
 // TODO: These should become properties of the GCStrategy, possibly with
 // command line overrides.
-static bool enableEntrySafepoints(Function &F) { return !NoEntry; }
-static bool enableBackedgeSafepoints(Function &F) { return !NoBackedge; }
-static bool enableCallSafepoints(Function &F) { return !NoCall; }
+static bool enableEntrySafepoints(Function &F) { return false; }
+    //!NoEntry; }
+static bool enableBackedgeSafepoints(Function &F) { return false; }
+    //!NoBackedge; }
+static bool enableCallSafepoints(Function &F) { return true; }
+//!NoCall; }
 
 // Normalize basic block to make it ready to be target of invoke statepoint.
 // Ensure that 'BB' does not have phi nodes. It may require spliting it.

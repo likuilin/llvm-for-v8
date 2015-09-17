@@ -2437,8 +2437,10 @@ static bool shouldRewriteStatepointsIn(Function &F) {
     const char *FunctionGCName = F.getGC();
     const StringRef StatepointExampleName("statepoint-example");
     const StringRef CoreCLRName("coreclr");
+    const StringRef V8GCName("v8-gc");
     return (StatepointExampleName == FunctionGCName) ||
-           (CoreCLRName == FunctionGCName);
+           (CoreCLRName == FunctionGCName) ||
+           (V8GCName == FunctionGCName);
   } else
     return false;
 }
