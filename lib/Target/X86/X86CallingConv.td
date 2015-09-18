@@ -247,7 +247,7 @@ def CC_X86_64_V8 : CallingConv<[
   // Do we have such arguments? IDK
   CCIfType<[i8, i16, i32], CCPromoteToType<i64>>,
 
-  // First two arguments are context and callee's JSFunction object
+  // First three arguments are context, callee's JSFunction object, and OSR predicate
   CCIfType<[i64], CCAssignToReg<[RSI, RDI, RBX]>>,
 
   // The remaining integer arguments are passed on the stack.
