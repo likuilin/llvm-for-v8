@@ -339,7 +339,7 @@ def RetCC_X86_64 : CallingConv<[
   CCIfCC<"CallingConv::X86_64_V8_S3", CCDelegateTo<RetCC_X86_64_V8_S3>>,
   CCIfCC<"CallingConv::X86_64_V8_S4", CCDelegateTo<RetCC_X86_64_V8_S4>>,
   CCIfCC<"CallingConv::X86_64_V8_S5", CCDelegateTo<RetCC_X86_64_V8_S5>>,
-  CCIfCC<"CallingConv::X86_64_V8_S6", CCDelegateTO<RetCC_X86_64_V8_S6>>,
+  CCIfCC<"CallingConv::X86_64_V8_S6", CCDelegateTo<RetCC_X86_64_V8_S6>>,
 
   // Handle JavaScript calls.
   CCIfCC<"CallingConv::WebKit_JS", CCDelegateTo<RetCC_X86_64_WebKit_JS>>,
