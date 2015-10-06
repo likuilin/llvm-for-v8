@@ -231,6 +231,11 @@ def RetCC_X86_64_V8_S5 : CallingConv<[
   CCIfType<[i64], CCAssignToReg<[RAX]>>
 ]>;
 
+def RetCC_X86_64_V8_S6 : CallingConv<[
+  // Return: RAX
+  CCIfType<[i64], CCAssignToReg<[RAX]>>
+]>;
+
 // X86-64 AnyReg return-value convention. No explicit register is specified for
 // the return-value. The register allocator is allowed and expected to choose
 // any free register.
@@ -247,7 +252,7 @@ def CC_X86_64_V8 : CallingConv<[
   // Do we have such arguments? IDK
   CCIfType<[i8, i16, i32], CCPromoteToType<i64>>,
 
-  // First two arguments are context and callee's JSFunction object
+  // First three arguments are context, callee's JSFunction object, and OSR predicate
   CCIfType<[i64], CCAssignToReg<[RSI, RDI, RBX]>>,
 
   // The remaining integer arguments are passed on the stack.
@@ -301,6 +306,13 @@ def CC_X86_64_V8_S5 : CallingConv<[
   CCIfType<[i64, f64], CCAssignToStack<8, 0>>
 ]>;
 
+def CC_X86_64_V8_S6 : CallingConv<[
+  CCIfType<[i8, i16, i32], CCPromoteToType<i64>>,
+  CCIfType<[i64], CCAssignToReg<[RSI, RDX, RBX, RDX]>>,
+  CCIfType<[i64, f64], CCAssignToStack<8, 0>>
+]>;
+
+
 // This is the root return-value convention for the X86-32 backend.
 def RetCC_X86_32 : CallingConv<[
   // If FastCC, use RetCC_X86_32_Fast.
@@ -327,6 +339,7 @@ def RetCC_X86_64 : CallingConv<[
   CCIfCC<"CallingConv::X86_64_V8_S3", CCDelegateTo<RetCC_X86_64_V8_S3>>,
   CCIfCC<"CallingConv::X86_64_V8_S4", CCDelegateTo<RetCC_X86_64_V8_S4>>,
   CCIfCC<"CallingConv::X86_64_V8_S5", CCDelegateTo<RetCC_X86_64_V8_S5>>,
+  CCIfCC<"CallingConv::X86_64_V8_S6", CCDelegateTo<RetCC_X86_64_V8_S6>>,
 
   // Handle JavaScript calls.
   CCIfCC<"CallingConv::WebKit_JS", CCDelegateTo<RetCC_X86_64_WebKit_JS>>,
@@ -843,6 +856,7 @@ def CC_X86_64 : CallingConv<[
   CCIfCC<"CallingConv::X86_64_V8_S3", CCDelegateTo<CC_X86_64_V8_S3>>,
   CCIfCC<"CallingConv::X86_64_V8_S4", CCDelegateTo<CC_X86_64_V8_S4>>,
   CCIfCC<"CallingConv::X86_64_V8_S5", CCDelegateTo<CC_X86_64_V8_S5>>,
+  CCIfCC<"CallingConv::X86_64_V8_S6", CCDelegateTo<CC_X86_64_V8_S6>>,
   CCIfCC<"CallingConv::X86_64_V8", CCDelegateTo<CC_X86_64_V8>>,
   CCIfCC<"CallingConv::GHC", CCDelegateTo<CC_X86_64_GHC>>,
   CCIfCC<"CallingConv::HiPE", CCDelegateTo<CC_X86_64_HiPE>>,
@@ -912,6 +926,7 @@ def CSR_X86_64_V8_S2 : CalleeSavedRegs<(add RBP)>;
 def CSR_X86_64_V8_S3 : CalleeSavedRegs<(add RBP)>;
 def CSR_X86_64_V8_S4 : CalleeSavedRegs<(add RBP)>;
 def CSR_X86_64_V8_S5 : CalleeSavedRegs<(add RBP)>;
+def CSR_X86_64_V8_S6 : CalleeSavedRegs<(add RBP)>;
 // RCX is not saved, the rest seems to be.
 def CSR_X86_64_V8_RWS : CalleeSavedRegs<(add RAX, RDX,  RBX,  RBP,  RSI, RDI,
                                          R8,  R9,  R10,  R11,  R12,  R13,  R14,
