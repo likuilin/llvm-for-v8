@@ -308,7 +308,7 @@ def CC_X86_64_V8_S5 : CallingConv<[
 
 def CC_X86_64_V8_S6 : CallingConv<[
   CCIfType<[i8, i16, i32], CCPromoteToType<i64>>,
-  CCIfType<[i64], CCAssignToReg<[RSI, RDX, RBX, RDX]>>,
+  CCIfType<[i64], CCAssignToReg<[RSI, RDI, RBX, RDX]>>,
   CCIfType<[i64, f64], CCAssignToStack<8, 0>>
 ]>;
 
