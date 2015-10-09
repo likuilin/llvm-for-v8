@@ -177,6 +177,9 @@ namespace CallingConv {
     
     //DoCallFunction
     X86_64_V8_S6 = 89,
+    
+    //DoStoreNamedGeneric
+    X86_64_V8_S7 = 90,
   };
 } // End CallingConv namespace
 
