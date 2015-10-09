@@ -205,6 +205,15 @@ static bool needsStatepoint(const CallSite &CS) {
   if (isStatepoint(CS) || isGCRelocate(CS) || isGCResult(CS)) {
     return false;
   }
+
+  AttributeSet Attrs = CS.getAttributes();
+  Attribute NoStatepoint =
+      Attrs.getAttribute(AttributeSet::FunctionIndex, "no-statepoint-please");
+  if (NoStatepoint.isStringAttribute()) {
+    // Client explicitly asked not to insert statepoint.
+    return false;
+  }
+
   return true;
 }
 
