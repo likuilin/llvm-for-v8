@@ -180,6 +180,10 @@ namespace CallingConv {
     
     //DoStoreNamedGeneric
     X86_64_V8_S7 = 90,
+
+    //DoFunctionLiteral
+    X86_64_V8_S8 = 91,
+
   };
 } // End CallingConv namespace
 
