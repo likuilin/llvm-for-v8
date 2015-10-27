@@ -41,6 +41,7 @@ namespace {
       llvm::linkErlangGC();
       llvm::linkShadowStackGC();
       llvm::linkStatepointExampleGC();
+      llvm::linkLLV8GC();
 
       (void) llvm::createBURRListDAGScheduler(nullptr,
                                               llvm::CodeGenOpt::Default);

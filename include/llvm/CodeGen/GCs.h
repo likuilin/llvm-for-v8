@@ -41,6 +41,9 @@ void linkErlangGCPrinter();
 void linkShadowStackGC();
 
 void linkStatepointExampleGC();
+
+/// Creates a GC representing the V8 JavaScript engine's garbage collector.
+void linkLLV8GC();
 }
 
 #endif
