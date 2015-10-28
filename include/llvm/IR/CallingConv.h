@@ -185,6 +185,9 @@ namespace CallingConv {
     
     //LoadNamedGeneric 
     X86_64_V8_S9 = 92,
+    
+    //DoStringCompareAndBranch
+    X86_64_V8_S10 = 93,
 
   };
 } // End CallingConv namespace
