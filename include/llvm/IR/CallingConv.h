@@ -188,6 +188,8 @@ namespace CallingConv {
     
     //DoStringCompareAndBranch
     X86_64_V8_S10 = 93,
+    
+    X86_64_V8_S11 = 94,
 
   };
 } // End CallingConv namespace
