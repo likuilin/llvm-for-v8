@@ -190,6 +190,9 @@ namespace CallingConv {
     X86_64_V8_S10 = 93,
     
     X86_64_V8_S11 = 94,
+    
+    //DoCallStub
+    X86_64_V8_Stub = 95,
 
   };
 } // End CallingConv namespace
