@@ -422,6 +422,7 @@ def RetCC_X86_64 : CallingConv<[
 
   // V8 return
   CCIfCC<"CallingConv::X86_64_V8", CCDelegateTo<RetCC_X86_64_V8>>,
+  CCIfCC<"CallingConv::X86_64_V8_E", CCDelegateTo<RetCC_X86_64_V8_E>>,
   CCIfCC<"CallingConv::X86_64_V8_CES", CCDelegateTo<RetCC_X86_64_V8_CES>>,
   CCIfCC<"CallingConv::X86_64_V8_S1", CCDelegateTo<RetCC_X86_64_V8_CES>>, // sic
   CCIfCC<"CallingConv::X86_64_V8_RWS", CCDelegateTo<RetCC_X86_64_V8_RWS>>,
@@ -958,6 +959,7 @@ def CC_X86_64 : CallingConv<[
   CCIfCC<"CallingConv::X86_64_V8_S10", CCDelegateTo<CC_X86_64_V8_S10>>,
   CCIfCC<"CallingConv::X86_64_V8_S11", CCDelegateTo<CC_X86_64_V8_S11>>,
   CCIfCC<"CallingConv::X86_64_V8_Stub", CCDelegateTo<CC_X86_64_V8_Stub>>,
+  CCIfCC<"CallingConv::X86_64_V8_E", CCDelegateTo<CC_X86_64_V8_E>>,
   CCIfCC<"CallingConv::X86_64_V8", CCDelegateTo<CC_X86_64_V8>>,
   CCIfCC<"CallingConv::GHC", CCDelegateTo<CC_X86_64_GHC>>,
   CCIfCC<"CallingConv::HiPE", CCDelegateTo<CC_X86_64_HiPE>>,
@@ -1019,6 +1021,7 @@ def CSR_64_AllRegs_AVX : CalleeSavedRegs<(sub (add CSR_64_MostRegs, RAX, RSP,
 // RAX, RBX, RCX, RDX are caller-saved
 // RSI, RDI, should always pe pushed onto the stack
 def CSR_X86_64_V8 : CalleeSavedRegs<(add RDI, RSI)>;
+def CSR_X86_64_V8_E : CalleeSavedRegs<(add RDI, RSI)>;
 
 // V8 CEntryStubs might clobber anything
 def CSR_X86_64_V8_CES : CalleeSavedRegs<(add RBP)>;
