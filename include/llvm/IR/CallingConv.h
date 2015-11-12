@@ -193,6 +193,9 @@ namespace CallingConv {
     
     //DoCallStub
     X86_64_V8_Stub = 95,
+    
+    // Extended JS CALL
+    X86_64_V8_E =  96,
 
   };
 } // End CallingConv namespace

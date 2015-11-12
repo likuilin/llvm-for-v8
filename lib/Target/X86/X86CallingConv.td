@@ -202,6 +202,15 @@ def RetCC_X86_64_V8 : CallingConv<[
   CCIfType<[i64], CCAssignToReg<[RAX]>>
 ]>;
 
+def RetCC_X86_64_V8_E : CallingConv<[
+  // Promote all types to i64
+  CCIfType<[i8, i16, i32], CCPromoteToType<i64>>,
+
+  // Return: RAX
+  CCIfType<[i64], CCAssignToReg<[RAX]>>
+]>;
+
+
 def RetCC_X86_64_V8_CES : CallingConv<[
   // Return: RAX // TODO: sometimes it's 2 values
   CCIfType<[i64], CCAssignToReg<[RAX]>>
@@ -290,6 +299,21 @@ def CC_X86_64_V8 : CallingConv<[
   // in 8 byte stack slots.
   CCIfType<[i64, f64], CCAssignToStack<8, 0>>
 ]>;
+
+def CC_X86_64_V8_E : CallingConv<[
+  // Promote i8/i16/i32 arguments to i64.
+  // Do we have such arguments? IDK
+  CCIfType<[i8, i16, i32], CCPromoteToType<i64>>,
+
+  // First three arguments are context, callee's JSFunction object, and OSR predicate
+  CCIfType<[i64], CCAssignToReg<[RSI, RDI, RBX, RAX]>>,
+
+  // The remaining integer arguments are passed on the stack.
+  // 64bit integer and floating-point arguments are default-aligned and stored
+  // in 8 byte stack slots.
+  CCIfType<[i64, f64], CCAssignToStack<8, 0>>
+]>;
+
 
 def CC_X86_64_V8_CES : CallingConv<[
   // The first 3 args are: nargs for the runtime function,
