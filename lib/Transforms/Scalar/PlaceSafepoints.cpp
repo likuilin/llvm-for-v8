@@ -733,6 +733,9 @@ bool PlaceSafepoints::runOnFunction(Function &F) {
       // Can not RAUW for the invoke gc result in case of phi nodes preset.
       assert(CS.isCall() || !isa<PHINode>(cast<Instruction>(GCResult)->getParent()->begin()));
 
+      // Now the gc.result has the name the call has previously had.
+      GCResult->takeName(CS.getInstruction());
+
       // Replace all uses with the new call
       CS.getInstruction()->replaceAllUsesWith(GCResult);
     }
