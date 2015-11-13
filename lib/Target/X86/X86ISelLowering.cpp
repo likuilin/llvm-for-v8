@@ -3890,7 +3890,21 @@ bool X86::isCalleePop(CallingConv::ID CallingConv,
   default:
     return false;
   case CallingConv::X86_64_V8:
+  case CallingConv::X86_64_V8_E:
   case CallingConv::X86_64_V8_S1:
+  case CallingConv::X86_64_V8_S2:
+  case CallingConv::X86_64_V8_S3:
+  case CallingConv::X86_64_V8_S4:
+  case CallingConv::X86_64_V8_S5:
+  case CallingConv::X86_64_V8_S6:
+  case CallingConv::X86_64_V8_S7:
+  case CallingConv::X86_64_V8_S8:
+  case CallingConv::X86_64_V8_S9:
+  case CallingConv::X86_64_V8_S10:
+  case CallingConv::X86_64_V8_S11:
+  case CallingConv::X86_64_V8_CES:
+  case CallingConv::X86_64_V8_RWS:
+  case CallingConv::X86_64_V8_Stub:
     return true;
   case CallingConv::X86_StdCall:
   case CallingConv::X86_FastCall:
