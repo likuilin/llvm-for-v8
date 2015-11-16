@@ -3902,6 +3902,7 @@ bool X86::isCalleePop(CallingConv::ID CallingConv,
   case CallingConv::X86_64_V8_S9:
   case CallingConv::X86_64_V8_S10:
   case CallingConv::X86_64_V8_S11:
+  case CallingConv::X86_64_V8_S12:
   case CallingConv::X86_64_V8_CES:
   case CallingConv::X86_64_V8_RWS:
   case CallingConv::X86_64_V8_Stub:
