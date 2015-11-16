@@ -275,6 +275,11 @@ def RetCC_X86_64_V8_Stub : CallingConv<[
   CCIfType<[i64], CCAssignToReg<[RAX]>>
 ]>;
 
+def RetCC_X86_64_V8_S12 : CallingConv<[
+  // Return: RAX
+  CCIfType<[i64], CCAssignToReg<[RAX]>>
+]>;
+
 // X86-64 AnyReg return-value convention. No explicit register is specified for
 // the return-value. The register allocator is allowed and expected to choose
 // any free register.
@@ -396,6 +401,12 @@ def CC_X86_64_V8_S11 : CallingConv<[
   CCIfType<[i64, f64], CCAssignToStack<8, 0>>
 ]>;
 
+def CC_X86_64_V8_S12 : CallingConv<[
+  CCIfType<[i8, i16, i32], CCPromoteToType<i64>>,
+  CCIfType<[i64], CCAssignToReg<[RAX, RBX]>>,
+  CCIfType<[i64, f64], CCAssignToStack<8, 0>>
+]>;
+
 def CC_X86_64_V8_Stub : CallingConv<[
   CCIfType<[i8, i16, i32], CCPromoteToType<i64>>,
   CCIfType<[i64], CCAssignToReg<[RSI]>>,
@@ -436,6 +447,7 @@ def RetCC_X86_64 : CallingConv<[
   CCIfCC<"CallingConv::X86_64_V8_S9", CCDelegateTo<RetCC_X86_64_V8_S9>>,
   CCIfCC<"CallingConv::X86_64_V8_S10", CCDelegateTo<RetCC_X86_64_V8_S10>>,
   CCIfCC<"CallingConv::X86_64_V8_S11", CCDelegateTo<RetCC_X86_64_V8_S11>>,
+  CCIfCC<"CallingConv::X86_64_V8_S12", CCDelegateTo<RetCC_X86_64_V8_S12>>,
   CCIfCC<"CallingConv::X86_64_V8_Stub", CCDelegateTo<RetCC_X86_64_V8_Stub>>,
   // Handle JavaScript calls.
   CCIfCC<"CallingConv::WebKit_JS", CCDelegateTo<RetCC_X86_64_WebKit_JS>>,
@@ -958,6 +970,7 @@ def CC_X86_64 : CallingConv<[
   CCIfCC<"CallingConv::X86_64_V8_S9", CCDelegateTo<CC_X86_64_V8_S9>>,
   CCIfCC<"CallingConv::X86_64_V8_S10", CCDelegateTo<CC_X86_64_V8_S10>>,
   CCIfCC<"CallingConv::X86_64_V8_S11", CCDelegateTo<CC_X86_64_V8_S11>>,
+  CCIfCC<"CallingConv::X86_64_V8_S12", CCDelegateTo<CC_X86_64_V8_S12>>,
   CCIfCC<"CallingConv::X86_64_V8_Stub", CCDelegateTo<CC_X86_64_V8_Stub>>,
   CCIfCC<"CallingConv::X86_64_V8_E", CCDelegateTo<CC_X86_64_V8_E>>,
   CCIfCC<"CallingConv::X86_64_V8", CCDelegateTo<CC_X86_64_V8>>,
@@ -1036,6 +1049,7 @@ def CSR_X86_64_V8_S8 : CalleeSavedRegs<(add RBP)>;
 def CSR_X86_64_V8_S9 : CalleeSavedRegs<(add RBP)>;
 def CSR_X86_64_V8_S10 : CalleeSavedRegs<(add RBP)>;
 def CSR_X86_64_V8_S11 : CalleeSavedRegs<(add RBP)>;
+def CSR_X86_64_V8_S12 : CalleeSavedRegs<(add RBP)>;
 def CSR_X86_64_V8_Stub : CalleeSavedRegs<(add RBP)>;
 // RCX is not saved, the rest seems to be.
 def CSR_X86_64_V8_RWS : CalleeSavedRegs<(add RAX, RDX,  RBX,  RBP,  RSI, RDI,

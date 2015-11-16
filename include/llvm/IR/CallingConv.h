@@ -197,6 +197,9 @@ namespace CallingConv {
     // Extended JS CALL
     X86_64_V8_E =  96,
 
+    //DoMaybeGrowElements
+    X86_64_V8_S12 = 96,
+
   };
 } // End CallingConv namespace
 
