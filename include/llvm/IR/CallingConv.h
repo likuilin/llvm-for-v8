@@ -199,6 +199,9 @@ namespace CallingConv {
 
     //DoMaybeGrowElements
     X86_64_V8_S12 = 97,
+  
+    //CallFunction
+    X86_64_V8_S13 = 98,
 
   };
 } // End CallingConv namespace

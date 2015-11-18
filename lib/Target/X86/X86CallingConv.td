@@ -412,6 +412,12 @@ def CC_X86_64_V8_Stub : CallingConv<[
   CCIfType<[i64], CCAssignToReg<[RSI]>>,
   CCIfType<[i64, f64], CCAssignToStack<8, 0>>
 ]>;
+def CC_X86_64_V8_S13 : CallingConv<[
+  CCIfType<[i8, i16, i32], CCPromoteToType<i64>>,
+  CCIfType<[i64], CCAssignToReg<[RSI, RDI]>>,
+  CCIfType<[i64, f64], CCAssignToStack<8, 0>>
+]>;
+
 
 
 // This is the root return-value convention for the X86-32 backend.
@@ -449,6 +455,7 @@ def RetCC_X86_64 : CallingConv<[
   CCIfCC<"CallingConv::X86_64_V8_S11", CCDelegateTo<RetCC_X86_64_V8_S11>>,
   CCIfCC<"CallingConv::X86_64_V8_S12", CCDelegateTo<RetCC_X86_64_V8_S12>>,
   CCIfCC<"CallingConv::X86_64_V8_Stub", CCDelegateTo<RetCC_X86_64_V8_Stub>>,
+  CCIfCC<"CallingConv::X86_64_V8_S13", CCDelegateTo<RetCC_X86_64_V8_Stub>>,
   // Handle JavaScript calls.
   CCIfCC<"CallingConv::WebKit_JS", CCDelegateTo<RetCC_X86_64_WebKit_JS>>,
   CCIfCC<"CallingConv::AnyReg", CCDelegateTo<RetCC_X86_64_AnyReg>>,
@@ -972,6 +979,7 @@ def CC_X86_64 : CallingConv<[
   CCIfCC<"CallingConv::X86_64_V8_S11", CCDelegateTo<CC_X86_64_V8_S11>>,
   CCIfCC<"CallingConv::X86_64_V8_S12", CCDelegateTo<CC_X86_64_V8_S12>>,
   CCIfCC<"CallingConv::X86_64_V8_Stub", CCDelegateTo<CC_X86_64_V8_Stub>>,
+  CCIfCC<"CallingConv::X86_64_V8_S13", CCDelegateTo<CC_X86_64_V8_S13>>,
   CCIfCC<"CallingConv::X86_64_V8_E", CCDelegateTo<CC_X86_64_V8_E>>,
   CCIfCC<"CallingConv::X86_64_V8", CCDelegateTo<CC_X86_64_V8>>,
   CCIfCC<"CallingConv::GHC", CCDelegateTo<CC_X86_64_GHC>>,
@@ -1050,6 +1058,7 @@ def CSR_X86_64_V8_S9 : CalleeSavedRegs<(add RBP)>;
 def CSR_X86_64_V8_S10 : CalleeSavedRegs<(add RBP)>;
 def CSR_X86_64_V8_S11 : CalleeSavedRegs<(add RBP)>;
 def CSR_X86_64_V8_S12 : CalleeSavedRegs<(add RBP)>;
+def CSR_X86_64_V8_S13 : CalleeSavedRegs<(add RBP)>;
 def CSR_X86_64_V8_Stub : CalleeSavedRegs<(add RBP)>;
 // RCX is not saved, the rest seems to be.
 def CSR_X86_64_V8_RWS : CalleeSavedRegs<(add RAX, RDX,  RBX,  RBP,  RSI, RDI,
