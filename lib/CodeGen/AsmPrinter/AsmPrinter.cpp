@@ -598,7 +598,7 @@ void AsmPrinter::EmitGlobalVariable(const GlobalVariable *GV) {
 /// function.
 void AsmPrinter::EmitFunctionHeader() {
   // Print out constants referenced by the function
-  EmitConstantPool();
+//  EmitConstantPool();
 
   // Print the 'header' of function.
   const Function *F = MF->getFunction();
@@ -999,6 +999,7 @@ void AsmPrinter::EmitFunctionBody() {
   MMI->EndFunction();
 
   OutStreamer->AddBlankLine();
+  EmitConstantPool();
 }
 
 /// \brief Compute the number of Global Variables that uses a Constant.
@@ -1303,8 +1304,13 @@ void AsmPrinter::EmitConstantPool() {
     if (!CPE.isMachineConstantPoolEntry())
       C = CPE.Val.ConstVal;
 
-    MCSection *S =
-        getObjFileLowering().getSectionForConstant(getDataLayout(), Kind, C);
+    MCSection *S = nullptr;
+    if (MF->getFunction()->getAttributes().hasAttribute(
+        AttributeSet::FunctionIndex, "put-constantpool-in-fn-section")) {
+      S = getObjFileLowering().getTextSection();
+    } else {
+      S = getObjFileLowering().getSectionForConstant(getDataLayout(), Kind, C);
+    }
 
     // The number of sections are small, just do a linear search from the
     // last section to the first.

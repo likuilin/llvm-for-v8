@@ -345,7 +345,8 @@ bool TargetLoweringObjectFileELF::shouldPutJumpTableInFunctionSection(
     bool UsesLabelDifference, const Function &F) const {
   // We can always create relative relocations, so use another section
   // that can be marked non-executable.
-  return false;
+  return F.getAttributes().hasAttribute(AttributeSet::FunctionIndex,
+                                        "put-jumptable-in-fn-section");
 }
 
 /// Given a mergeable constant with the specified size and relocation
