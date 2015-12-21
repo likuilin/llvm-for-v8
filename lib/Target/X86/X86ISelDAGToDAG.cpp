@@ -798,6 +798,22 @@ bool X86DAGToDAGISel::MatchWrapper(SDValue N, X86ISelAddressMode &AM) {
     return false;
   }
 
+  // This block enables rip-relative offset encoding for jump tables
+  // for the Large code model.
+  if (Subtarget->is64Bit() && N.getOpcode() == X86ISD::WrapperRIP &&
+      M == CodeModel::Large) {
+    // Base and index reg must be 0 in order to use %rip as base.
+    if (AM.hasBaseOrIndexReg())
+      return true;
+    if (JumpTableSDNode *J = dyn_cast<JumpTableSDNode>(N0)) {
+      AM.JT = J->getIndex();
+      AM.SymbolFlags = J->getTargetFlags();
+      if (N.getOpcode() == X86ISD::WrapperRIP)
+        AM.setBaseReg(CurDAG->getRegister(X86::RIP, MVT::i64));
+      return false;
+    }
+  }
+
   // Handle the case when globals fit in our immediate field: This is true for
   // X86-32 always and X86-64 when in -mcmodel=small mode.  In 64-bit
   // mode, this only applies to a non-RIP-relative computation.

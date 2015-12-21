@@ -11596,7 +11596,8 @@ SDValue X86TargetLowering::LowerJumpTable(SDValue Op, SelectionDAG &DAG) const {
   CodeModel::Model M = DAG.getTarget().getCodeModel();
 
   if (Subtarget->isPICStyleRIPRel() &&
-      (M == CodeModel::Small || M == CodeModel::Kernel))
+      (M == CodeModel::Small || M == CodeModel::Kernel ||
+          M == CodeModel::Large))
     WrapperKind = X86ISD::WrapperRIP;
   else if (Subtarget->isPICStyleGOT())
     OpFlag = X86II::MO_GOTOFF;
