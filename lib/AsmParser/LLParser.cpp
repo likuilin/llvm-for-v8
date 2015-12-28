@@ -1563,6 +1563,11 @@ bool LLParser::ParseOptionalCallingConv(unsigned &CC) {
   case lltok::kw_x86_64_v8_cescc:CC = CallingConv::X86_64_V8_CES; break;
   case lltok::kw_x86_64_v8_rwscc:CC = CallingConv::X86_64_V8_RWS; break;
   case lltok::kw_x86_64_v8_s1cc: CC = CallingConv::X86_64_V8_S1; break;
+  case lltok::kw_x86_64_v8_s2cc: CC = CallingConv::X86_64_V8_S2; break;
+  case lltok::kw_x86_64_v8_s3cc: CC = CallingConv::X86_64_V8_S3; break;
+  case lltok::kw_x86_64_v8_s4cc: CC = CallingConv::X86_64_V8_S4; break;
+  case lltok::kw_x86_64_v8_s5cc: CC = CallingConv::X86_64_V8_S5; break;
+  case lltok::kw_x86_64_v8_s6cc: CC = CallingConv::X86_64_V8_S6; break;
   case lltok::kw_preserve_mostcc:CC = CallingConv::PreserveMost; break;
   case lltok::kw_preserve_allcc: CC = CallingConv::PreserveAll; break;
   case lltok::kw_ghccc:          CC = CallingConv::GHC; break;

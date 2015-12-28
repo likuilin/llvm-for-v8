@@ -100,6 +100,10 @@ namespace lltok {
     kw_x86_64_v8_rwscc,
     kw_x86_64_v8_s1cc,
     kw_x86_64_v8_s2cc,
+    kw_x86_64_v8_s3cc,
+    kw_x86_64_v8_s4cc,
+    kw_x86_64_v8_s5cc,
+    kw_x86_64_v8_s6cc,
     kw_preserve_mostcc, kw_preserve_allcc,
     kw_ghccc,
 

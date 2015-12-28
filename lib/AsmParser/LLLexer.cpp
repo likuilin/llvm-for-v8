@@ -588,6 +588,11 @@ lltok::Kind LLLexer::LexIdentifier() {
   KEYWORD(x86_64_v8_cescc);
   KEYWORD(x86_64_v8_rwscc);
   KEYWORD(x86_64_v8_s1cc);
+  KEYWORD(x86_64_v8_s2cc);
+  KEYWORD(x86_64_v8_s3cc);
+  KEYWORD(x86_64_v8_s4cc);
+  KEYWORD(x86_64_v8_s5cc);
+  KEYWORD(x86_64_v8_s6cc);
   KEYWORD(preserve_mostcc);
   KEYWORD(preserve_allcc);
   KEYWORD(ghccc);
