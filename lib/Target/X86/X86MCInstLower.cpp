@@ -831,6 +831,10 @@ void X86AsmPrinter::LowerSTATEPOINT(const MachineInstr &MI,
                                     X86MCInstLower &MCIL) {
   assert(Subtarget->is64Bit() && "Statepoint currently only supports X86-64");
 
+  // Record our statepoint node in the same section used by STACKMAP
+  // and PATCHPOINT
+  SM.recordStatepoint(MI);
+
   StatepointOpers SOpers(&MI);
   if (unsigned PatchBytes = SOpers.getNumPatchBytes()) {
     EmitNops(*OutStreamer, PatchBytes, Subtarget->is64Bit(),
@@ -874,10 +878,6 @@ void X86AsmPrinter::LowerSTATEPOINT(const MachineInstr &MI,
     CallInst.addOperand(CallTargetMCOp);
     OutStreamer->EmitInstruction(CallInst, getSubtargetInfo());
   }
-
-  // Record our statepoint node in the same section used by STACKMAP
-  // and PATCHPOINT
-  SM.recordStatepoint(MI);
 }
 
 void X86AsmPrinter::LowerFAULTING_LOAD_OP(const MachineInstr &MI,
