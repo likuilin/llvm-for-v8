@@ -477,6 +477,10 @@ static bool isNoReturnDef(const MachineOperand &MO) {
 }
 
 bool MachineRegisterInfo::isPhysRegModified(unsigned PhysReg) const {
+  // FIXME: it's a hack to always push rsi and rdi.
+  if (MF->getFunction()->getCallingConv() == CallingConv::X86_64_V8)
+    if (PhysReg == 39 || PhysReg == 43)
+      return true;
   if (UsedPhysRegMask.test(PhysReg))
     return true;
   const TargetRegisterInfo *TRI = getTargetRegisterInfo();

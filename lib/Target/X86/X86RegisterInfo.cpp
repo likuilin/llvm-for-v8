@@ -419,16 +419,6 @@ BitVector X86RegisterInfo::getReservedRegs(const MachineFunction &MF) const {
   BitVector Reserved(getNumRegs());
   const X86FrameLowering *TFI = getFrameLowering(MF);
 
-  // exclude RSI and RDI from allocatables per V8 ABI
-  for (MCSubRegIterator I(X86::RSI, this, /*IncludeSelf=*/true); I.isValid();
-       ++I)
-    Reserved.set(*I);
-
-  // exclude RSI and RDI from allocatables per V8 ABI
-  for (MCSubRegIterator I(X86::RDI, this, /*IncludeSelf=*/true); I.isValid();
-       ++I)
-    Reserved.set(*I);
-
   // Set the stack-pointer register and its aliases as reserved.
   for (MCSubRegIterator I(X86::RSP, this, /*IncludeSelf=*/true); I.isValid();
        ++I)
