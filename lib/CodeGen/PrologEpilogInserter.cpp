@@ -736,6 +736,7 @@ void PEI::calculateFrameObjectOffsets(MachineFunction &Fn) {
       AdjustStackOffset(MFI, *I, StackGrowsDown, Offset, MaxAlign);
   }
 
+  MFI->setNoParamsStackSize(Offset - LocalAreaOffset);
   if (!TFI.targetHandlesStackFrameRounding()) {
     // If we have reserved argument space for call sites in the function
     // immediately on entry to the current function, count it as part of the

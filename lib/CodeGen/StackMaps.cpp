@@ -338,7 +338,7 @@ void StackMaps::recordStackMapOpers(const MachineInstr &MI, uint64_t ID,
   bool HasDynamicFrameSize =
       MFI->hasVarSizedObjects() || RegInfo->needsStackRealignment(*(AP.MF));
   FnStackSize[AP.CurrentFnSym] =
-      HasDynamicFrameSize ? UINT64_MAX : MFI->getStackSize();
+      HasDynamicFrameSize ? UINT64_MAX : MFI->getNoParamsStackSize();
 }
 
 void StackMaps::recordStackMap(const MachineInstr &MI) {

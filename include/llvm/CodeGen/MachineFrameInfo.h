@@ -160,6 +160,7 @@ class MachineFrameInfo {
   /// above.  It then updates StackSize to contain the number of bytes that need
   /// to be allocated on entry to the function.
   uint64_t StackSize;
+  uint64_t NoParamsStackSize;
 
   /// The amount that a frame offset needs to be adjusted to
   /// have the actual offset from the stack/frame pointer.  The exact usage of
@@ -255,6 +256,7 @@ public:
       : StackAlignment(StackAlign), StackRealignable(isStackRealign),
         RealignOption(RealignOpt) {
     StackSize = NumFixedObjects = OffsetAdjustment = MaxAlignment = 0;
+    NoParamsStackSize = 0;
     HasVarSizedObjects = false;
     FrameAddressTaken = false;
     ReturnAddressTaken = false;
@@ -444,6 +446,11 @@ public:
 
   /// Set the size of the stack.
   void setStackSize(uint64_t Size) { StackSize = Size; }
+
+  /// Same as getStackSize(), only does not consider stack slots used
+  /// for parameter passing to callees and alignment.
+  uint64_t getNoParamsStackSize() const { return NoParamsStackSize; }
+  void setNoParamsStackSize(uint64_t Size) { NoParamsStackSize = Size; }
 
   /// Estimate and return the size of the stack frame.
   unsigned estimateStackSize(const MachineFunction &MF) const;
